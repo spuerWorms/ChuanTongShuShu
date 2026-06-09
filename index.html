@@ -7,7 +7,7 @@
         /* CSS 样式保持不变 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: "Microsoft YaHei", "SimHei", sans-serif; background-color: #f5f1e6; color: #333; line-height: 1.6; padding: 10px; min-height: 100vh; }
-        .container { max-width: 800px; margin: 0 auto; background-color: #fff; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; min-height: calc(100vh - 20px); }
+        .container { max-width: 800px; margin: 0 auto; background-color: #fff; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px 20px 10px 20px; min-height: calc(100vh - 20px); }
         header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #e0d6c3; padding-bottom: 15px; }
         h1 { color: #8c2318; font-size: 24px; margin-bottom: 5px; }
         .subtitle { color: #666; font-size: 14px; }
@@ -68,7 +68,12 @@
         .file-controls { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; }
         .qimen-container { margin-top: 30px; font-family: "SimSun", "宋体", serif; }
         .qimen-info { background-color: #f5f1e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #d4c9b1; font-size: 15px; line-height: 2; }
-        .qimen-pan { margin: 20px auto; max-width: 100%; background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 20px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #d4c9b1; font-size: 16px; line-height: 1.8; white-space: pre; font-family: "SimSun", "宋体", monospace; }
+        .qimen-pan { margin: 20px auto; max-width: 100%; background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355; font-size: 16px; line-height: 1.8; white-space: pre; font-family: "SimSun", "宋体", monospace; }
+        .qimen-grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 0; border: 1px solid #8b7355; border-radius: 6px; overflow: hidden; width: fit-content; margin: 0 auto; font-family: "SimSun", "宋体", monospace; font-size: 16px; line-height: 1.8; }
+        .qimen-grid .qimen-cell { background: #faf6ed; text-align: center; vertical-align: middle; width: 120px; height: 120px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; border-right: 1px solid #8b7355; border-bottom: 1px solid #8b7355; }
+        .qimen-grid .qimen-cell:nth-child(3n) { border-right: none; }
+        .qimen-grid .qimen-cell:nth-last-child(-n+3) { border-bottom: none; }
+        .qimen-grid .qimen-cell span { display: inline; }
         
         
         
@@ -81,23 +86,25 @@
         .loading { color: #27ae60; font-style: italic; }
 
         /* 遁甲九宫格样式 */
-        .dunjia-container { margin-top: 30px; font-family: "SimSun", "宋体", serif; }
-        .dunjia-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #d4c9b1; border: 2px solid #d4c9b1; border-radius: 6px; overflow: hidden; margin-top: 15px; aspect-ratio: 1/1; max-width: 420px; margin-left: auto; margin-right: auto; }
-        .dunjia-cell { background: #faf6ed; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 120px; }
-        .dunjia-cell.center { background: #f0e8d5; }
-        .dunjia-god { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; color: #c0392b; font-weight: bold; }
-        .dunjia-star { position: absolute; top: 28%; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: #2a7de1; font-weight: 500; }
-        .dunjia-door { position: absolute; bottom: 28%; left: 50%; transform: translateX(-50%); font-size: 0.9rem; color: #8c2318; font-weight: bold; }
-        .dunjia-stem-t { position: absolute; top: 4px; right: 6px; font-size: 1rem; font-weight: bold; color: #333; }
-        .dunjia-stem-d { position: absolute; bottom: 4px; left: 6px; font-size: 1rem; font-weight: bold; color: #888; }
+        .dunjia-container { margin-top: 30px; font-family: "SimSun", "宋体", monospace; }
+        .dunjia-grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 0; border: 1px solid #333; border-radius: 6px; overflow: hidden; margin-top: 15px; width: 362px; margin-left: auto; margin-right: auto; font-family: "SimSun", "宋体", monospace; font-size: 16px; line-height: 1.8; }
+        .dunjia-cell { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; height: 120px; box-sizing: border-box; background: #faf6ed; border-right: 1px solid #333; border-bottom: 1px solid #333; }
+        .dunjia-cell:nth-child(3n) { border-right: none; }
+        .dunjia-cell:nth-last-child(-n+3) { border-bottom: none; }
+        .dunjia-cell.center { }
+        .dunjia-god { position: absolute; top: 14px; left: 8px; font-size: 1rem; }
+        .dunjia-star { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
+        .dunjia-door { position: absolute; bottom: 14px; right: 8px; font-size: 1rem; }
+        .dunjia-stem-t { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
+        .dunjia-stem-d { position: absolute; bottom: 14px; left: 8px; font-size: 1rem; }
         .dunjia-num { position: absolute; bottom: 2px; right: 4px; font-size: 0.6rem; color: #bbb; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>茅山奇门排盘系统</h1>
-            <p class="subtitle">精准天文历算 · 支持转盘/飞盘双排法</p>
+            <h1>奇门排盘系统</h1>
+            <p class="subtitle">精准天文历算 · 支持茅山奇门转盘/飞盘&时家奇门拆补/置润</p>
         </header>
         
         <div class="controls">
@@ -135,7 +142,19 @@
                 <button id="zhirunBtn">置闰法</button>
             </div>
         </div>
-        <div id="qimenResult" class="qimen-container"></div>
+        <div id="qimenResult" class="qimen-container">
+            <div style="text-align: center; padding: 80px 20px; min-height: 380px; color: #8c7a6a; background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); border-radius: 5px; border: 1px solid #d4c9b1;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#c9b896" stroke-width="1.5" style="margin-bottom: 20px; display: inline-block;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                <h2 style="color: #8c2318; font-family: 'SimSun', serif; margin-bottom: 12px;">请选择时间并点击排盘</h2>
+                <p style="font-size: 14px; line-height: 2;">
+                    选择上方的时间，然后选择一种排盘方式：<br>
+                    <strong>转盘排法</strong> / <strong>飞盘排法</strong> / <strong>拆补法</strong> / <strong>置闰法</strong>
+                </p>
+            </div>
+        </div>
         <!-- 拆补法/置闰法排盘结果区域 -->
         <div id="dunjiaResult" class="dunjia-container" style="display:none;"></div>
     </div>
@@ -2484,8 +2503,10 @@ function getDayVoid(dayGanzhi) {
             // 核心函数：将一行内容按三列 [1] [2] [1] 的宽度严格格式化，并用空格隔开
             const formatRow = (part1, part2, part3) => {
                 if (typeof part2 === 'string' && part2.includes('（')) {
+                    // 去掉括号，两个天干一起显示，如 乙庚
+                    const cleanPart2 = part2.replace(/[（）]/g, '');
                     const p1 = (part1 + '　').slice(0, 1);
-                    const combined = p1 + '　' + part2;
+                    const combined = p1 + '　' + cleanPart2;
                     return (combined + '　　　　　　').slice(0, 6);
                 } else {
                     const p1 = (part1 + '　').slice(0, 1);
@@ -2514,19 +2535,17 @@ function getDayVoid(dayGanzhi) {
                 cellData[p.num] = { l1: line1, l2: line2 };
             });
             
-            // 修复：使用全角空格
+            // 构建CSS grid九宫格
             const get = (num) => cellData[num] || {l1: '　'.repeat(6), l2: '　'.repeat(6)};
+            const cellHtml = (num) => `<div class="qimen-cell"><span style="display:block; margin-bottom: 30px">${get(num).l1}</span><span>${get(num).l2}</span></div>`;
 
-            panText += `${get(4).l1}│${get(9).l1}│${get(2).l1}\n`;
-            panText += `${get(4).l2}│${get(9).l2}│${get(2).l2}\n`;
-            panText += "──────┼──────┼──────\n";
-            panText += `${get(3).l1}│${get(5).l1}│${get(7).l1}\n`;
-            panText += `${get(3).l2}│${get(5).l2}│${get(7).l2}\n`;
-            panText += "──────┼──────┼──────\n";
-            panText += `${get(8).l1}│${get(1).l1}│${get(6).l1}\n`;
-            panText += `${get(8).l2}│${get(1).l2}│${get(6).l2}\n`;
+            const panTableHtml = `<div class="qimen-grid">
+                ${cellHtml(4)}${cellHtml(9)}${cellHtml(2)}
+                ${cellHtml(3)}${cellHtml(5)}${cellHtml(7)}
+                ${cellHtml(8)}${cellHtml(1)}${cellHtml(6)}
+            </div>`;
             
-            const panHtml = `<div class="qimen-pan">${panText}</div>`;
+            const panHtml = `<div class="qimen-pan">${panText}${panTableHtml}</div>`;
             resultDiv.innerHTML = `<h2>奇门遁甲 (茅山派${info.type})</h2>` + panHtml;
         }
  function generateAndDisplayQimenChart(dateObject, type) {
@@ -2838,46 +2857,38 @@ function getDayVoid(dayGanzhi) {
             }
 
             let html = `<h2>奇门遁甲 (${data.method || '遁甲排盘'})</h2>`;
+            html += `<div style="background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355;">`;
             // 信息卡片1: 农历日期与干支
             html += `<div class="qimen-info">`;
-            html += `<div style="text-align:center; font-size:1.2rem; font-weight:bold; color:#8c2318; margin-bottom:6px;">${data.lunar}</div>`;
-            html += `<div style="text-align:center; font-size:0.95rem; margin-bottom:6px; letter-spacing:1px;">${data.ganzhi}</div>`;
-            html += `<div style="text-align:center; font-size:0.85rem; color:#666;">`;
+            html += `<div style="text-align:left; font-size:1.2rem; margin-bottom:6px;">${data.lunar}</div>`;
+            html += `<div style="text-align:left; font-size:0.95rem; margin-bottom:6px; letter-spacing:1px;">${data.ganzhi}</div>`;
+            html += `<div style="text-align:left; font-size:0.85rem;">`;
             html += `${data.jieqi} <span style="margin:0 6px; opacity:0.3;">|</span> ${data.kongwang}`;
             html += `</div>`;
-            html += `<div style="text-align:center; font-size:0.75rem; color:#5a4a3a; margin-top:4px;">${data.exact_jieqi}</div>`;
+            html += `<div style="text-align:left; font-size:0.75rem; margin-top:4px;">${data.exact_jieqi}</div>`;
 
             // 置闰信息（仅置闰法显示）
             if (data.zhirun_info) {
                 html += `<div style="background:rgba(140,35,24,0.05); padding:8px; border-radius:4px; margin-top:8px; border:1px dashed #d4c9b1;">`;
                 html += `<div style="display:flex; justify-content:space-between; font-size:0.85rem;">`;
-                html += `<span>符头: <strong style="color:#8c2318;">${data.zhirun_info.futou}</strong></span>`;
-                html += `<span style="color:${data.zhirun_info.chaoshen ? '#2a7de1' : '#2e7d32'};">${data.zhirun_info.chaoshen ? '超神' : '接气'}</span>`;
+                html += `<span>符头: ${data.zhirun_info.futou}</span>`;
+                html += `<span>${data.zhirun_info.chaoshen ? '超神' : '接气'}</span>`;
                 html += `</div>`;
-                html += `<div style="font-size:0.75rem; color:#666; margin-top:4px;">积日: ${data.zhirun_info.days} 天${data.zhirun_info.leaping ? ' (已置润)' : ''}</div>`;
+                html += `<div style="font-size:0.75rem; margin-top:4px;">积日: ${data.zhirun_info.days} 天${data.zhirun_info.leaping ? ' (已置润)' : ''}</div>`;
                 html += `</div>`;
             }
             html += `</div>`;
 
             // 信息卡片2: 局数与值符值使
             html += `<div class="qimen-info">`;
-            html += `<div style="display:flex; justify-content:space-between; margin-bottom:6px;">`;
-            html += `<span>局数: <strong style="color:#8c2318;">${data.ju.name}</strong></span>`;
-            html += `<span>月将: <strong style="color:#2a7de1;">${data.ju.jiang}</strong></span>`;
-            html += `</div>`;
-            html += `<div style="display:flex; justify-content:space-between;">`;
-            html += `<span>值符: <strong style="color:#c0392b;">${data.ju.zhifu}</strong></span>`;
-            html += `<span>值使: <strong style="color:#8c2318;">${data.ju.zhishi}</strong></span>`;
-            html += `</div>`;
-            html += `<div style="border-top:1px solid #d4c9b1; margin:8px 0; opacity:0.3;"></div>`;
-            html += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666;">`;
-            html += `<span>真黄经: ${data.info.lon}</span>`;
-            html += `<span>斗柄: ${data.info.dubhe}</span>`;
-            html += `</div>`;
-            html += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666;">`;
-            html += `<span>时差(EOT): ${data.info.eot}</span>`;
-            html += `<span style="font-size:0.7rem; color:#999;">Meeus Algorithm</span>`;
-            html += `</div>`;
+            html += `<table style="border-collapse:collapse;">`;
+            html += `<colgroup><col style="width:auto;"><col style="width:130px;"></colgroup>`;
+            html += `<tr><td style="padding:0 0 6px 0; text-align:left; white-space:nowrap;">局数: ${data.ju.name}</td><td style="padding:0 0 6px 30px; text-align:left; white-space:nowrap;">月将: ${data.ju.jiang}</td></tr>`;
+            html += `<tr><td style="padding:0 0 6px 0; text-align:left; white-space:nowrap;">值符: ${data.ju.zhifu}</td><td style="padding:0 0 6px 30px; text-align:left; white-space:nowrap;">值使: ${data.ju.zhishi}</td></tr>`;
+            html += `<tr><td colspan="2" style="padding:8px 0 6px 0;"><div style="border-top:1px solid #d4c9b1; opacity:0.3;"></div></td></tr>`;
+            html += `<tr><td style="padding:0 0 6px 0; text-align:left; white-space:nowrap; font-size:0.8rem;">真黄经: ${data.info.lon}</td><td style="padding:0 0 6px 30px; text-align:left; white-space:nowrap; font-size:0.8rem;">斗柄: ${data.info.dubhe}</td></tr>`;
+            html += `<tr><td style="padding:0; text-align:left; white-space:nowrap; font-size:0.8rem;">时差(EOT): ${data.info.eot}</td><td style="padding:0 0 0 30px; text-align:left; white-space:nowrap; font-size:0.8rem;">Meeus Algorithm</td></tr>`;
+            html += `</table>`;
             html += `</div>`;
 
             // 九宫格
@@ -2888,12 +2899,11 @@ function getDayVoid(dayGanzhi) {
                 const isCenter = idx === 5;
                 html += `<div class="dunjia-cell${isCenter ? ' center' : ''}">`;
                 if (g) {
-                    if (g.god) html += `<div class="dunjia-god">${g.god}</div>`;
-                    if (g.star) html += `<div class="dunjia-star">${g.star}</div>`;
-                    if (g.door) html += `<div class="dunjia-door">${g.door}</div>`;
+                    if (g.god) html += `<div class="dunjia-god">${g.god.slice(-1)}</div>`;
+                    if (g.star) { const s = g.star.replace(/[（()）]/g, ''); const chars = []; for (let i = 0; i < s.length; i += 2) { if (i + 1 < s.length && /[\u4e00-\u9fff]/.test(s[i]) && /[\u4e00-\u9fff]/.test(s[i+1])) chars.push(s[i+1]); else if (i < s.length) chars.push(s[i]); } html += `<div class="dunjia-star">${chars.join('')}</div>`; }
+                    if (g.door) html += `<div class="dunjia-door">${g.door.slice(-1)}</div>`;
                     if (g.stem_t) {
-                        const len = g.stem_t.length;
-                        html += `<div class="dunjia-stem-t"${len > 1 ? ' style="font-size:0.85rem;"' : ''}>${g.stem_t}</div>`;
+                        html += `<div class="dunjia-stem-t">${g.stem_t}</div>`;
                     }
                     if (g.stem_d) html += `<div class="dunjia-stem-d">${g.stem_d}</div>`;
                 }
@@ -2901,9 +2911,9 @@ function getDayVoid(dayGanzhi) {
                 html += `</div>`;
             });
             html += `</div>`;
-
-            // 坐标信息
-            html += `<div style="text-align:center; font-size:0.7rem; color:#999; margin-top:10px;">${data.info.coords}</div>`;
+            // 坐标信息（背景内）
+            html += `<div style="text-align:center; font-size:0.7rem; margin-top:10px;">${data.info.coords}</div>`;
+            html += `</div>`;
 
             container.innerHTML = html;
         }
