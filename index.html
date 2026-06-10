@@ -4,18 +4,28 @@
     <meta charset="UTF-8">
     <title>茅山奇门排盘系统 (数据内嵌版)</title>
     <style>
-        /* CSS 样式保持不变 */
+        /* ========================================
+         * 全局基础样式
+         * 采用仿古纸张色调，配合宋体字体呈现传统文化风格
+         * ======================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: "Microsoft YaHei", "SimHei", sans-serif; background-color: #f5f1e6; color: #333; line-height: 1.6; padding: 10px; min-height: 100vh; }
+        /* 主容器：居中、白色背景、阴影 */
         .container { max-width: 800px; margin: 0 auto; background-color: #fff; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px 20px 10px 20px; min-height: calc(100vh - 20px); }
+        /* 页头：标题居中，底部装饰线 */
         header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #e0d6c3; padding-bottom: 15px; }
         h1 { color: #8c2318; font-size: 24px; margin-bottom: 5px; }
         .subtitle { color: #666; font-size: 14px; }
+        /* 控制面板：日期选择与排盘方式按钮 */
         .controls { background-color: #f9f5eb; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #e0d6c3; }
         .control-group { margin-bottom: 15px; }
 
-        /* 日期选择器输入框+日历图标 */
+        /* ========================================
+         * 日期选择器组件样式 (QimenDatePicker)
+         * 包含输入框、日历图标、弹窗及动画
+         * ======================================== */
         .qdp-input-wrap { display: inline-flex; align-items: center; position: relative; }
+        /* 日期输入框：仿古底色，居中文本，聚焦时红色边框 */
         .qdp-custom-input {
             padding: 5px 28px 5px 10px;
             border: 1px solid #c9b896;
@@ -29,6 +39,7 @@
             text-align: center;
         }
         .qdp-custom-input:focus { border-color: #8c2318; box-shadow: 0 0 0 2px rgba(140,35,24,0.1); }
+        /* 日历图标：绝对定位于输入框右侧 */
         .qdp-calendar-icon {
             position: absolute;
             right: 8px;
@@ -46,7 +57,7 @@
         .qdp-calendar-icon:hover { opacity: 0.85; }
         .qdp-calendar-icon svg { display: block; }
 
-        /* 弹窗 - 紧贴输入框下方 */
+        /* 日期选择器弹窗：fixed 定位，带淡入动画 */
         .qdp-popup-overlay {
             display: none;
             position: fixed;
@@ -55,48 +66,68 @@
         }
         .qdp-popup-overlay.show { display: block; }
         @keyframes qdp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* 弹窗内容盒：上滑动画 */
         .qdp-popup-box {
             background: transparent;
             border-radius: 12px;
             animation: qdp-slideUp 0.25s ease;
         }
         @keyframes qdp-slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* ========================================
+         * 通用表单控件样式
+         * ======================================== */
         label { display: inline-block; width: 120px; font-weight: bold; color: #5a4a3a; }
         input, select, button { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        /* 主按钮：暗红色主题，hover 变亮 */
         button { background-color: #8c2318; color: white; border: none; cursor: pointer; transition: background-color 0.3s; margin-right: 10px; }
         button:hover { background-color: #a52a1f; }
         .file-controls { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; }
+        /* ========================================
+         * 转盘/飞盘排盘结果样式
+         * ======================================== */
         .qimen-container { margin-top: 30px; font-family: "SimSun", "宋体", serif; }
+        /* 信息卡片：显示农历、干支、节气等基本信息 */
         .qimen-info { background-color: #f5f1e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #d4c9b1; font-size: 15px; line-height: 2; }
+        /* 排盘面板：仿古纸张渐变背景，内阴影营造质感 */
         .qimen-pan { margin: 20px auto; max-width: 100%; background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355; font-size: 16px; line-height: 1.8; white-space: pre; font-family: "SimSun", "宋体", monospace; }
+        /* 转盘/飞盘九宫格：3x3 CSS Grid 布局 */
         .qimen-grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 0; border: 1px solid #8b7355; border-radius: 6px; overflow: hidden; width: fit-content; margin: 0 auto; font-family: "SimSun", "宋体", monospace; font-size: 16px; line-height: 1.8; }
+        /* 九宫格单元格：flex 居中布局，上下 padding 8px，左右 padding 4px */
         .qimen-grid .qimen-cell { background: #faf6ed; text-align: center; vertical-align: middle; width: 120px; height: 120px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; border-right: 1px solid #8b7355; border-bottom: 1px solid #8b7355; }
+        /* 每行第3列去掉右边框（与外框重合） */
         .qimen-grid .qimen-cell:nth-child(3n) { border-right: none; }
+        /* 最后3行去掉下边框（与外框重合） */
         .qimen-grid .qimen-cell:nth-last-child(-n+3) { border-bottom: none; }
         .qimen-grid .qimen-cell span { display: inline; }
-        
-        
-        
-        
-        
-        
-        
+
+        /* 状态提示样式 */
         .status { margin-top: 10px; font-style: italic; color: #7f8c8d; text-align: center; }
         .error { color: #c0392b; font-weight: bold; }
         .loading { color: #27ae60; font-style: italic; }
 
-        /* 遁甲九宫格样式 */
+        /* ========================================
+         * 拆补法/置闰法九宫格样式 (遁甲排盘)
+         * 与转盘/飞盘不同，采用 absolute 定位布局
+         * 每个宫位内：神(左上)、天盘干(上中)、星(下中)、门(右下)、地盘干(左下)
+         * ======================================== */
         .dunjia-container { margin-top: 30px; font-family: "SimSun", "宋体", monospace; }
         .dunjia-grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 0; border: 1px solid #333; border-radius: 6px; overflow: hidden; margin-top: 15px; width: 362px; margin-left: auto; margin-right: auto; font-family: "SimSun", "宋体", monospace; font-size: 16px; line-height: 1.8; }
+        /* 遁甲单元格：relative 容器，内部元素 absolute 定位 */
         .dunjia-cell { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; height: 120px; box-sizing: border-box; background: #faf6ed; border-right: 1px solid #333; border-bottom: 1px solid #333; }
         .dunjia-cell:nth-child(3n) { border-right: none; }
         .dunjia-cell:nth-last-child(-n+3) { border-bottom: none; }
         .dunjia-cell.center { }
+        /* 八神：左上角，top/left 控制与边框的间距 */
         .dunjia-god { position: absolute; top: 14px; left: 8px; font-size: 1rem; }
+        /* 九星：底部居中，与天盘干垂直对齐 */
         .dunjia-star { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
+        /* 八门：右下角 */
         .dunjia-door { position: absolute; bottom: 14px; right: 8px; font-size: 1rem; }
+        /* 天盘干：顶部居中，与星垂直对齐 */
         .dunjia-stem-t { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
+        /* 地盘干：左下角，与神垂直左对齐 */
         .dunjia-stem-d { position: absolute; bottom: 14px; left: 8px; font-size: 1rem; }
+        /* 宫位序号：右下角极小字号，辅助标识 */
         .dunjia-num { position: absolute; bottom: 2px; right: 4px; font-size: 0.6rem; color: #bbb; }
     </style>
 </head>
@@ -162,17 +193,39 @@
     <script src="js/lunar.js"></script>
     <script src="js/qimen-datepicker.js"></script>
     <script>
-        // 全局变量和常量
+        /* ========================================
+         * 全局变量与常量定义
+         * ======================================== */
+
+        /** @type {Object} 天文历算数据，键为年份，值为 { jd0, events[] } */
         let fullData = {};
+
+        /** @type {string[]} 十天干：甲乙丙丁戊己庚辛壬癸 */
         const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+
+        /** @type {string[]} 十二地支：子丑寅卯辰巳午未申酉戌亥 */
         const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+        /**
+         * @type {Object} 24节气映射表
+         * J=节气(节), Z=中气(气), 数字=月份序号
+         * Z11a/Z11b 均为冬至（因跨年需要两个标识）
+         */
         const solarTermMap = {'J1':'立春','Z1':'雨水','J2':'惊蛰','Z2':'春分','J3':'清明','Z3':'谷雨','J4':'立夏','Z4':'小满','J5':'芒种','Z5':'夏至','J6':'小暑','Z6':'大暑','J7':'立秋','Z7':'处暑','J8':'白露','Z8':'秋分','J9':'寒露','Z9':'霜降','J10':'立冬','Z10':'小雪','J11':'大雪','Z11a':'冬至','Z11b':'冬至','J12':'小寒','Z12':'大寒',};
+
+        /** @type {Object} 月相映射：Q0=朔(初一), Q1=上弦, Q2=望(十五), Q3=下弦 */
         const moonPhaseMap = {'Q0':'朔 (初一)','Q1':'上弦','Q2':'望 (十五)','Q3':'下弦'};
+
+        /** @type {string[]} 农历日期名称：初一到三十 */
         const lunarDays = ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
 
-        // ==========================================================
-        // ==== 步骤 1: 将您的 TDBtimes.txt 数据嵌入到此处 ====
-        // ==========================================================
+        /* ========================================
+         * 内嵌天文数据 (TDBtimes.txt)
+         * 格式：每行一个年份，包含儒略日基准值(jd0)及各节气/月相的偏移量
+         * 节气偏移量：jd0 + offset = 节气时刻的 TDB 儒略日
+         * 月相偏移量：同上，Q0=朔, Q1=上弦, Q2=望, Q3=下弦
+         * 数据覆盖约 1600-3363 年，用于精确天文历算
+         * ======================================== */
         const embeddedDataText = `
 year  jd0  Z11a  J12  Z12  J01  Z01  J02  Z02  J03  Z03  J04  Z04  J05  Z05  J06  Z06  J07  Z07  J08  Z08  J09  Z09  J10  Z10  J11  Z11b  Q0_01  Q1_01  Q2_01  Q3_01  Q0_02  Q1_02  Q2_02  Q3_02  Q0_03  Q1_03  Q2_03  Q3_03  Q0_04  Q1_04  Q2_04  Q3_04  Q0_05  Q1_05  Q2_05  Q3_05  Q0_06  Q1_06  Q2_06  Q3_06  Q0_07  Q1_07  Q2_07  Q3_07  Q0_08  Q1_08  Q2_08  Q3_08  Q0_09  Q1_09  Q2_09  Q3_09  Q0_10  Q1_10  Q2_10  Q3_10  Q0_11  Q1_11  Q2_11  Q3_11  Q0_12  Q1_12  Q2_12  Q3_12  Q0_13  Q1_13  Q2_13  Q3_13  Q0_14  Q1_14  Q2_14  Q3_14  Q0_15  Q1_15  Q2_15  Q3_15
 1600  2305446.166666667  -8.461003499219611  6.25536443215703  20.9851087116224  35.77262166420724  50.63466697992152  65.60780142713709  80.69696532555413  95.925029594907  111.2790779220788  126.765018878245  142.3507871838957  158.0256825979399  173.7438657448976  189.4830568161555  205.1951742586879  220.8547387431045  236.4244507713907  251.8848037756674  267.2179266591592  282.4172802494837  297.4867977408078  312.4351548897382  327.2844326965612  342.0562852997911  356.7838191462235  -13.05911969294957  -5.993017218765244  0.9442787926550329  8.867050243671091  16.54704946063279  23.336038496931  30.60826992975417  38.7430286590147  46.06417631313418  52.69491398815648  60.32821131692344  68.50645858838021  75.48876905651564  82.11975011679165  90.05378613642731  98.11388606816733  104.8401090833464  111.628204870218  119.7421142980159  127.5559373487115  134.1556647896993  141.2179583922868  149.3671633801114  156.8562213974523  163.4803903660061  170.8741962522727  178.9173290347123  186.0640169726796  192.856203267595  200.5780791482828  208.3925271544078  215.24358236995  222.3147764005589  230.3079593130949  237.8053446072093  244.4636233422255  251.8742617942002  260.0339091202105  267.1820241209412  273.7867525730298  281.5376646327049  289.7155703364492  296.5579567114617  303.2574926147161  311.2882994295787  319.3126357612865  325.9671378428255  332.8910751122124  341.0825296440889  348.8034813022239  355.4303769844186  362.6685549236655  370.8523723160752  378.1961923512724  384.9501285557249  392.5394246941763  400.5304537406381  407.5236554002062  414.5169507370787  422.4285687000831
@@ -2080,52 +2133,182 @@ year  jd0  Z11a  J12  Z12  J01  Z01  J02  Z02  J03  Z03  J04  Z04  J05  Z05  J06
 `;
 
         // 奇门遁甲相关常量
+        /* ========================================
+         * 奇门遁甲排盘常量 (转盘/飞盘共用)
+         * ======================================== */
+
+        /**
+         * @type {Object} 九宫信息映射
+         * 键为宫位编号(1-9, 洛书序)，值为宫位名称、本位星、本位门
+         * 5宫(中宫)无本位门，天禽星寄居
+         */
         const palacesInfo = { 1: { name: '坎', star: '天蓬', door: '休门' }, 8: { name: '艮', star: '天任', door: '生门' }, 3: { name: '震', star: '天冲', door: '伤门' }, 4: { name: '巽', star: '天辅', door: '杜门' }, 9: { name: '离', star: '天英', door: '景门' }, 2: { name: '坤', star: '天芮', door: '死门' }, 7: { name: '兑', star: '天柱', door: '惊门' }, 6: { name: '乾', star: '天心', door: '开门' }, 5: { name: '中', star: '天禽', door: null } };
+
+        /**
+         * @type {Object} 阳遁局数映射
+         * 键为节气名，值为[上元局数, 中元局数, 下元局数]
+         * 阳遁：冬至→夏至前，地盘天干顺排
+         */
         const juShuYang = { '冬至':[1,7,4], '惊蛰':[1,7,4], '小寒':[2,8,5], '大寒':[3,9,6], '春分':[3,9,6], '雨水':[9,6,3], '清明':[4,1,7], '立夏':[4,1,7], '立春':[8,5,2], '谷雨':[5,2,8], '小满':[5,2,8], '芒种':[6,3,9] };
+
+        /**
+         * @type {Object} 阴遁局数映射
+         * 键为节气名，值为[上元局数, 中元局数, 下元局数]
+         * 阴遁：夏至→冬至前，地盘天干逆排
+         */
         const juShuYin = { '夏至':[9,3,6], '白露':[9,3,6], '小暑':[8,2,5], '大暑':[7,1,4], '秋分':[7,1,4], '立秋':[2,5,8], '寒露':[6,9,3], '立冬':[6,9,3], '处暑':[1,4,7], '霜降':[5,8,2], '小雪':[5,8,2], '大雪':[4,7,1] };
+
+        /**
+         * @type {number[]} 洛书8宫顺时针路径（不含中宫5）
+         * 1→8→3→4→9→2→7→6，对应坎→艮→震→巽→离→坤→兑→乾
+         */
         const luoShuPath8Clockwise = [1, 8, 3, 4, 9, 2, 7, 6];
+
+        /** @type {number[]} 洛书8宫逆时针路径（不含中宫5） */
         const luoShuPath8CounterClockwise = [1, 6, 7, 2, 9, 4, 3, 8];
-        const luoShuPath9Clockwise = [1, 8, 3, 4, 9, 2, 7, 6, 5]; 
+
+        /** @type {number[]} 洛书9宫顺时针路径（含中宫5） */
+        const luoShuPath9Clockwise = [1, 8, 3, 4, 9, 2, 7, 6, 5];
+
+        /** @type {number[]} 洛书9宫逆时针路径（含中宫5） */
         const luoShuPath9CounterClockwise = [1, 6, 7, 2, 9, 4, 3, 8, 5];
+
+        /* ---- 转盘排法专用常量 ---- */
+
+        /** @type {string[]} 转盘九星顺序：按洛书8宫顺时针排列 */
         const zhuanpanStarOrder = ['天蓬', '天任', '天冲', '天辅', '天英', '天芮', '天柱', '天心'];
+
+        /** @type {string[]} 转盘八门顺序：按洛书8宫顺时针排列 */
         const zhuanpanDoorOrder = ['休门', '生门', '伤门', '杜门', '景门', '死门', '惊门', '开门'];
+
+        /** @type {string[]} 转盘八神顺序：值符→螣蛇→太阴→六合→白虎→玄武→九地→九天 */
         const zhuanpanGodOrder = ['值符', '螣蛇', '太阴', '六合', '白虎', '玄武', '九地', '九天'];
+
+        /* ---- 飞盘排法专用常量 ---- */
+
+        /** @type {string[]} 飞盘九星顺序：按宫位1-9排列，含天禽(5宫) */
         const feipanStarOrder = ['天蓬', '天芮', '天冲', '天辅', '天禽', '天心', '天柱', '天任', '天英'];
+
+        /** @type {string[]} 飞盘八门顺序：按宫位1-9排列(不含5宫) */
         const feipanDoorOrder = ['休门', '死门', '伤门', '杜门', '开门', '惊门', '生门', '景门'];
-        const feipanGodOrderYang = ['值符', '螣蛇', '太阴', '六合', '勾陈', '朱雀', '九地', '九天', '玄武']; 
+
+        /** @type {string[]} 飞盘阳遁九神顺序：含勾陈、朱雀，共9神 */
+        const feipanGodOrderYang = ['值符', '螣蛇', '太阴', '六合', '勾陈', '朱雀', '九地', '九天', '玄武'];
+
+        /** @type {string[]} 飞盘阴遁九神顺序：含白虎、太常，共9神 */
         const feipanGodOrderYin = ['值符', '螣蛇', '太阴', '六合', '白虎', '太常', '玄武', '九地', '九天'];
+
+        /* ---- 缩写映射：用于九宫格中显示缩写 ---- */
+
+        /** @type {Object} 九星缩写映射，如 天蓬→蓬 */
         const starAbbrMap = { '天蓬': '蓬', '天任': '任', '天冲': '冲', '天辅': '辅', '天英': '英', '天芮': '芮', '天柱': '柱', '天心': '心', '天禽': '禽' };
+
+        /** @type {Object} 八门缩写映射，如 休门→休 */
         const doorAbbrMap = { '休门': '休', '生门': '生', '伤门': '伤', '杜门': '杜', '景门': '景', '死门': '死', '惊门': '惊', '开门': '开' };
+
+        /** @type {Object} 八神缩写映射，如 值符→符 */
         const godAbbrMap = { '值符': '符', '螣蛇': '蛇', '太阴': '阴', '六合': '合', '白虎': '虎', '玄武': '武', '九地': '地', '九天': '天', '勾陈': '勾', '朱雀': '雀', '太常': '常' };
         
-        // 干支计算函数...
+        /* ========================================
+         * 干支计算工具函数
+         * ======================================== */
+
+        /**
+         * 根据公历年份计算年干支
+         * @param {number} year - 公历年份
+         * @returns {string} 年干支，如"甲子"
+         * @note 以1984年(甲子年)为基准，60甲子循环
+         */
         function getYearGanzhi(year) { const baseYear = 1984; const yearIndex = (year - baseYear) % 60; const adjustedIndex = yearIndex < 0 ? yearIndex + 60 : yearIndex; return heavenlyStems[adjustedIndex % 10] + earthlyBranches[adjustedIndex % 12]; }
+
+        /**
+         * 根据年份和儒略日计算月干支
+         * @param {number} year - 公历年份
+         * @param {number} eventJdTdb - 事件时刻的 TDB 儒略日
+         * @returns {string} 月干支，如"丙寅"
+         * @note 月干支以节气(节)为界，年干决定月干起始(五虎遁)
+         *   甲己年起丙寅，乙庚年起戊寅，丙辛年起庚寅，丁壬年起壬寅，戊癸年起甲寅
+         */
         function getMonthGanzhi(year, eventJdTdb) { const terms = []; if (fullData[year - 1] && fullData[year - 1].events) { terms.push(...fullData[year - 1].events.filter(e => e.type === 'solar-term' && e.key.startsWith('J'))); } if (fullData[year] && fullData[year].events) { terms.push(...fullData[year].events.filter(e => e.type === 'solar-term' && e.key.startsWith('J'))); } if (terms.length === 0) return '——'; let lastTerm = null; for (let i = terms.length - 1; i >= 0; i--) { if (terms[i].jdTdb <= eventJdTdb) { lastTerm = terms[i]; break; } } if (!lastTerm) return '——'; const termYear = lastTerm.dateTime.year; const yearStemRaw = (termYear - 1984) % 10; const yearStem = yearStemRaw < 0 ? yearStemRaw + 10 : yearStemRaw; let monthStemStart; switch (yearStem) { case 0: case 5: monthStemStart = 2; break; case 1: case 6: monthStemStart = 4; break; case 2: case 7: monthStemStart = 6; break; case 3: case 8: monthStemStart = 8; break; case 4: case 9: monthStemStart = 0; break; } const jieNum = parseInt(lastTerm.key.substring(1)); const monthStemIndex = (monthStemStart + jieNum - 1) % 10; const monthBranchIndex = (jieNum + 1) % 12; return heavenlyStems[monthStemIndex] + earthlyBranches[monthBranchIndex]; }
+        /**
+         * 根据儒略日计算日干支
+         * @param {number} julianDay - 儒略日（可为小数）
+         * @returns {string} 日干支，如"甲子"
+         * @note 以 JD 0 对应的干支为基准推算，+49 为校正常数
+         */
         function getDayGanzhiByJD(julianDay) { const integerJd = Math.floor(julianDay + 0.5); const ganzhiIndex = (integerJd + 49) % 60; return heavenlyStems[ganzhiIndex % 10] + earthlyBranches[ganzhiIndex % 12]; }
+
+        /**
+         * 根据日干支序号和小时计算时干支
+         * @param {number} dayGanzhiIndex - 日干支在60甲子中的序号(0-59)
+         * @param {number} hour - 小时(0-23)
+         * @returns {string} 时干支，如"甲子"
+         * @note 时支由小时直接推算(23-1子时, 1-3丑时...)，时干由日干决定(五鼠遁)
+         *   甲己日起甲子，乙庚日起丙子，丙辛年起戊子，丁壬日起庚子，戊癸日起壬子
+         */
         function getHourGanzhi(dayGanzhiIndex, hour) { const dayStem = dayGanzhiIndex % 10; const hourBranch = Math.floor((hour + 1) / 2) % 12; let hourStemStart; switch (dayStem) { case 0: case 5: hourStemStart = 0; break; case 1: case 6: hourStemStart = 2; break; case 2: case 7: hourStemStart = 4; break; case 3: case 8: hourStemStart = 6; break; case 4: case 9: hourStemStart = 8; break; } const hourStem = (hourStemStart + hourBranch) % 10; return heavenlyStems[hourStem] + earthlyBranches[hourBranch]; }
+
+        /**
+         * 儒略日转公历日期时间
+         * @param {number} jd - 儒略日
+         * @returns {Object} 日期时间对象 { date, time, year, month, day, hours, minutes, seconds, originalJd }
+         * @note 算法参考天文算法标准公式，支持格里历和儒略历自动切换
+         */
         function jdToDateTime(jd) { const Z = Math.floor(jd + 0.5); const F = jd + 0.5 - Z; let A = Z; if (Z >= 2299161) { const alpha = Math.floor((Z - 1867216.25) / 36524.25); A = Z + 1 + alpha - Math.floor(alpha / 4); } const B = A + 1524; const C = Math.floor((B - 122.1) / 365.25); const D = Math.floor(365.25 * C); const E = Math.floor((B - D) / 30.6001); const day = B - D - Math.floor(30.6001 * E) + F; let month = E < 14 ? E - 1 : E - 13; let year = month > 2 ? C - 4716 : C - 4715; const date = Math.floor(day); const fractionalDay = day - date; const totalSeconds = fractionalDay * 86400; const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); const seconds = Math.floor(totalSeconds % 60); return { date: `${year}年${month}月${date}日`, time: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`, year: year, month: month, day: date, hours: hours, minutes: minutes, seconds: seconds, originalJd: jd }; }
-        // ==== 修复：定义全局 Delta T 常量 ====
+        /* ========================================
+         * Delta T 常量：用于 UTC 与 TDB 时间系统转换
+         * TT = UTC + ΔT, TDB ≈ TT + 微小修正
+         * deltaSeconds = 32.184(TT-TAI) + 37(闰秒累计, 2017年后近似值)
+         * 注意：闰秒会随 IERS 公告更新，此处为近似值
+         * ======================================== */
         const deltaSeconds = 32.184 + 37; // (TT - UT1) + (TAI - UTC) approx for 2025
         const deltaDays = deltaSeconds / 86400; // TDB 与 UTC 的日差值
 
-        // ==== 修复：农历月计算所需的全局常量 ====
+        /* ========================================
+         * 农历月计算全局数据
+         * lunarMonthData: 由 parseEmbeddedData() 填充的农历月映射数组
+         * lunarMonths: 农历月份名称
+         * ======================================== */
         let lunarMonthData = []; // 将存储计算好的农历月地图
         const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
-        // GBT-33661 中用于判断闰月的中气
-        const zhongqiKeys = ['Z12', 'Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z6', 'Z7', 'Z8', 'Z9', 'Z10']; 
-        // 完整的中气-月份映射 (Z11=冬至, 是锚点)
-        const zhongqiMap = { 
+        /**
+         * @type {string[]} 中气键名列表，用于判断农历闰月
+         * 不含 Z11(冬至)，因冬至是农历年的锚点
+         */
+        const zhongqiKeys = ['Z12', 'Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z6', 'Z7', 'Z8', 'Z9', 'Z10'];
+
+        /**
+         * @type {Object} 中气→农历月份映射
+         * 农历月以中气为标志：雨水→正月, 春分→二月, ..., 小雪→十月
+         * Z11(冬至)属于十一月，是农历年起始锚点
+         */
+        const zhongqiMap = {
             'Z12': 12, 'Z1': 1, 'Z2': 2, 'Z3': 3, 'Z4': 4, 'Z5': 5, 'Z6': 6, 
             'Z7': 7, 'Z8': 8, 'Z9': 9, 'Z10': 10, 'Z11a': 11, 'Z11b': 11
         };
         
-        function tdbToUtc8(tdbJd, year) { 
+        /**
+         * TDB 儒略日转 UTC+8 (北京时间) 日期时间
+         * @param {number} tdbJd - TDB 时间系统的儒略日
+         * @param {number} year - 年份（用于日志，可选）
+         * @returns {Object} 北京时间的日期时间对象
+         * @note TDB → UTC: 减去 deltaDays；UTC → UTC+8: 加 8 小时
+         */
+        function tdbToUtc8(tdbJd, year) {
             // 使用全局 deltaDays 常量
-            const utc8Jd = tdbJd - deltaDays + (8 / 24); 
-            return jdToDateTime(utc8Jd); 
+            const utc8Jd = tdbJd - deltaDays + (8 / 24);
+            return jdToDateTime(utc8Jd);
         }
 
-        // ==== 数据读取与解析 (修改后) ====
+        /* ========================================
+         * 数据读取与解析
+         * ======================================== */
+
+        /**
+         * 初始化并解析内嵌的天文数据
+         * 1. 解析 embeddedDataText 填充 fullData
+         * 2. 构建农历月映射表 lunarMonthData
+         */
         async function initializeAndParseData() {
             try {
                 await parseData(embeddedDataText, null);
@@ -2136,6 +2319,14 @@ year  jd0  Z11a  J12  Z12  J01  Z01  J02  Z02  J03  Z03  J04  Z04  J05  Z05  J06
             }
         }
         
+        /**
+         * 解析内嵌的天文数据文本，填充 fullData 全局对象
+         * @param {string} text - 原始数据文本（每行一个年份的数据）
+         * @param {HTMLElement|null} progressBar - 进度条元素（内嵌数据时为 null）
+         * @returns {Promise<void>}
+         * @note 数据格式：year jd0 [25个节气偏移] [60个月相偏移]
+         *   每行至少87列。节气列从第2列开始，月相列从第27列开始
+         */
         function parseData(text, progressBar) {
             return new Promise((resolve) => {
                 const lines = text.trim().split('\n');
@@ -2226,11 +2417,24 @@ year  jd0  Z11a  J12  Z12  J01  Z01  J02  Z02  J03  Z03  J04  Z04  J05  Z05  J06
         
 
         // ==========================================================
-        // ==== 奇门排盘核心功能 (保持不变) ====
-        // ==========================================================
+        /* ========================================
+         * 奇门排盘核心工具函数
+         * ======================================== */
+
+        /**
+         * 根据干支字符串获取其在60甲子中的序号
+         * @param {string} ganzhi - 干支字符串，如"甲子"
+         * @returns {number} 60甲子序号(0-59)，未找到返回 -1
+         * @note 天干序号 % 10 == i % 10 且 地支序号 % 12 == i % 12 时，i 即为所求
+         */
         function getGanzhiIndex(ganzhi) { const stem = ganzhi[0]; const branch = ganzhi[1]; const stemIndex = heavenlyStems.indexOf(stem); const branchIndex = earthlyBranches.indexOf(branch); for (let i = 0; i < 60; i++) { if (i % 10 === stemIndex && i % 12 === branchIndex) { return i; } } return -1; }
+
 /**
- * 根据日干支计算空亡地支
+ * 根据日干支计算空亡地支（日空亡）
+ * @param {string} dayGanzhi - 日干支，如"甲子"
+ * @returns {string} 空亡地支，如"戌亥"
+ * @note 算法：找到旬首地支，再查表得出该旬的空亡地支
+ *   甲子旬→戌亥, 甲戌旬→申酉, 甲申旬→午未, 甲午旬→辰巳, 甲辰旬→寅卯, 甲寅旬→子丑
  */
 function getDayVoid(dayGanzhi) {
     const stem = dayGanzhi[0];
@@ -2252,50 +2456,78 @@ function getDayVoid(dayGanzhi) {
         default: return "";
     }
 }
+        /**
+         * 奇门遁甲排盘核心计算函数（转盘/飞盘共用）
+         * @param {Date} dt - 排盘时间
+         * @param {string} type - 排盘类型："zhuanpan"(转盘) 或 "feipan"(飞盘)
+         * @returns {Object} 排盘结果对象，包含四柱、局数、地盘天干、值符值使、天盘星/门/神等
+         *
+         * 计算流程：
+         * 1. 计算四柱（年月日时干支）
+         * 2. 判断阴遁/阳遁（基于冬至/夏至）
+         * 3. 确定当前节气及元（上/中/下元），计算局数
+         * 4. 排地盘天干（戊己庚辛壬癸丁丙乙，按局数起始宫位排列）
+         * 5. 确定值符（本时辰旬首所遁之天干在地盘的落宫对应的星）和值使（对应的门）
+         * 6. 排天盘（星、门、神根据排法类型不同而异）
+         *
+         * @note 时间系统说明：
+         *   - BJT(UTC+8) 用于日干支和时干支计算
+         *   - TDB 用于所有天文计算（节气时刻、阴遁阳遁判断）
+         *   - deltaDays = (32.184 + 37) / 86400，用于 UTC → TDB 转换
+         */
         function calculateQimenPan(dt, type) {
-            // 1. 公共步骤：计算四柱、局数、地盘、值符、值使
-            
+            // ---- 步骤1：计算四柱（年月日时干支） ----
+
             // 统一计算 TDB, BJT, UTC 儒略日
             const jd_utc = dt.getTime() / 86400000 + 2440587.5;
             const jd_tdb = jd_utc + deltaDays; // ★ 修复：TDB = UTC + deltaT
             const jd_bjt = jd_utc + 8 / 24;   // BJT = UTC + 8
-            
+
             // BJT 用于日干支和时干支
             const dayGanzhi = getDayGanzhiByJD(jd_bjt);
             const dayGanzhiIndex = getGanzhiIndex(dayGanzhi);
             const yearGanzhi = getYearGanzhi(dt.getFullYear());
             const hourGanzhi = getHourGanzhi(dayGanzhiIndex, dt.getHours());
-            
+
             // ★ 修复：TDB 用于所有天文计算
-            const monthGanzhi = getMonthGanzhi(dt.getFullYear(), jd_tdb); 
-            
+            const monthGanzhi = getMonthGanzhi(dt.getFullYear(), jd_tdb);
+
+            // ---- 步骤2：判断阴遁/阳遁 ----
+            // 收集前后三年的节气数据，确保边界情况覆盖
             const allTerms = [...(fullData[dt.getFullYear() - 1]?.events || []), ...(fullData[dt.getFullYear()]?.events || []), ...(fullData[dt.getFullYear() + 1]?.events || [])].filter(e => e.type === 'solar-term').sort((a, b) => a.jdTdb - b.jdTdb);
             const dongzhi_current_year = allTerms.find(t => t.name === '冬至' && t.dateTime.year === dt.getFullYear());
             const dongzhi_prev_year = allTerms.find(t => t.name === '冬至' && t.dateTime.year === dt.getFullYear() - 1);
             const xiazhi_current_year = allTerms.find(t => t.name === '夏至' && t.dateTime.year === dt.getFullYear());
-            
+
+            // 阳遁：冬至后到夏至前；阴遁：夏至后到冬至前
             let dun = 'yang';
             // ★ 修复：所有节气比较均使用 TDB
-            if (xiazhi_current_year && jd_tdb >= xiazhi_current_year.jdTdb) { 
-                if (dongzhi_current_year && jd_tdb >= dongzhi_current_year.jdTdb) { dun = 'yang'; } else { dun = 'yin'; } 
+            if (xiazhi_current_year && jd_tdb >= xiazhi_current_year.jdTdb) {
+                if (dongzhi_current_year && jd_tdb >= dongzhi_current_year.jdTdb) { dun = 'yang'; } else { dun = 'yin'; }
             } else if (dongzhi_prev_year && jd_tdb < dongzhi_prev_year.jdTdb) { dun = 'yin'; }
-            
+
+            // ---- 步骤3：确定当前节气及元，计算局数 ----
             let lastTerm = null;
             if (allTerms.length === 0) {
                 lastTerm = { name: "立春", jdTdb: jd_tdb - 15 };
             } else {
                 for (let term of allTerms) { if (term.jdTdb <= jd_tdb) { lastTerm = term; } }
             }
-            
+
             // ★ 修复：使用 TDB 计算节气元
-            const hoursSinceJie = (jd_tdb - lastTerm.jdTdb) * 24; 
+            const hoursSinceJie = (jd_tdb - lastTerm.jdTdb) * 24;
             
+            // 判断三元：上元(0-120h)、中元(120-240h)、下元(240h+)
             let yuan;
             if (hoursSinceJie < 120) yuan = 0; else if (hoursSinceJie < 240) yuan = 1; else yuan = 2;
-            
-            // ... (函数其余部分保持不变) ...
+
+            // 根据节气和元查表得局数
             const juShuMap = dun === 'yang' ? juShuYang : juShuYin;
             const juShu = juShuMap[lastTerm.name][yuan];
+
+            // ---- 步骤4：排地盘天干 ----
+            // 六仪三奇顺序：戊己庚辛壬癸丁丙乙
+            // 阳遁从局数宫位起戊顺排，阴遁从局数宫位起戊逆排
             const diPan = {};
             const stemOrder = ['戊', '己', '庚', '辛', '壬', '癸', '丁', '丙', '乙'];
             const path = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -2305,29 +2537,45 @@ function getDayVoid(dayGanzhi) {
                 if (dun === 'yang') { palaceNum = path[(startIdx + i) % 9]; } else { palaceNum = path[(startIdx - i + 9) % 9]; }
                 diPan[palaceNum] = stemOrder[i];
             }
+
+            // ---- 步骤5：确定值符和值使 ----
+            // 值符：时辰旬首所遁之天干在地盘落宫对应的本位星
+            // 值使：值符所在宫位的本位门
             const hourStem = hourGanzhi[0];
             const hourBranch = hourGanzhi[1];
+            // 六甲旬首遁干映射：甲子→戊, 甲戌→己, 甲申→庚, 甲午→辛, 甲辰→壬, 甲寅→癸
             const xunShouMap = { '子': '戊', '戌': '己', '申': '庚', '午': '辛', '辰': '壬', '寅': '癸' };
             const xunShouBranch = earthlyBranches[(earthlyBranches.indexOf(hourBranch) - heavenlyStems.indexOf(hourStem) + 12) % 12];
             const xunShouHiddenStem = xunShouMap[xunShouBranch];
             const xunShouGanzhi = "甲" + xunShouBranch;
+            // 旬首遁干在地盘的落宫
             let zhiFuPalaceNum = parseInt(Object.keys(diPan).find(p => diPan[p] === xunShouHiddenStem));
             const zhiFuStar = palacesInfo[zhiFuPalaceNum].star;
             let zhiShiDoor = palacesInfo[zhiFuPalaceNum].door;
+            // 中宫(5宫)寄宫：阳遁寄坤2宫(生门)，阴遁寄艮8宫(死门)
             if (zhiFuPalaceNum === 5) zhiShiDoor = (dun === 'yang') ? '生门' : '死门';
+
+            // 时干在地盘的落宫（甲时取旬首遁干）
             let effectiveStemForHourPalace = hourStem;
             if (hourStem === '甲') {
                 effectiveStemForHourPalace = xunShouHiddenStem;
             }
             const hourStemPalace = parseInt(Object.keys(diPan).find(p => diPan[p] === effectiveStemForHourPalace));
+
+            // ---- 步骤6：排天盘（星、门、神） ----
             let tianPanStars = {}, renPanDoors = {}, shenPan = {};
             let zhiShiDoorPalaceNum;
+
             if (type === 'zhuanpan') {
+                // ====== 转盘排法 ======
+                // 天禽星寄宫：阳遁寄天任(艮8)，阴遁寄天芮(坤2)
                 const hostStarForQin = dun === 'yang' ? '天任' : '天芮';
                 const locatingZhifu = (zhiFuStar === '天禽') ? hostStarForQin : zhiFuStar;
+
+                // 排天盘九星：值符随时干落宫，其余星按洛书8宫顺时针依次排布
                 const zhiFuStarIdx = zhuanpanStarOrder.indexOf(locatingZhifu);
                 let starStartPalace = hourStemPalace;
-                if (starStartPalace === 5) starStartPalace = 2;
+                if (starStartPalace === 5) starStartPalace = 2; // 中宫寄坤2
                 let starStartIdx = luoShuPath8Clockwise.indexOf(starStartPalace);
                 if (starStartIdx > -1) {
                     for (let i = 0; i < 8; i++) {
@@ -2335,17 +2583,21 @@ function getDayVoid(dayGanzhi) {
                         const currentPalace = luoShuPath8Clockwise[(starStartIdx + i) % 8];
                         tianPanStars[currentPalace] = currentStar;
                     }
+                    // 标记寄宫星位带"(禽)"
                     let hostStarPalace = Object.keys(tianPanStars).find(p => tianPanStars[p] === hostStarForQin);
                     if (hostStarPalace) { tianPanStars[hostStarPalace] += "(禽)"; }
                 }
+
+                // 排八门：值使随时干落宫，按天干序数推算值使落宫
                 const hourStemIndex1Based = heavenlyStems.indexOf(hourStem) + 1;
                 if (dun === 'yang') {
                     const palaceNum = zhiFuPalaceNum + hourStemIndex1Based - 1;
                     zhiShiDoorPalaceNum = ((palaceNum - 1) % 9) + 1;
-                } else { 
+                } else {
                     const palaceNum = zhiFuPalaceNum - hourStemIndex1Based + 1;
                     zhiShiDoorPalaceNum = ((palaceNum - 1 + 90) % 9) + 1;
                 }
+                // 中宫门寄宫：阳遁寄艮8(生门)，阴遁寄坤2(死门)
                 if (zhiShiDoorPalaceNum === 5) zhiShiDoorPalaceNum = (dun === 'yang') ? 8 : 2;
                 let zhiShiDoorIdx = zhuanpanDoorOrder.indexOf(zhiShiDoor);
                 let doorStartIdx = luoShuPath8Clockwise.indexOf(zhiShiDoorPalaceNum);
@@ -2354,6 +2606,8 @@ function getDayVoid(dayGanzhi) {
                         renPanDoors[luoShuPath8Clockwise[(doorStartIdx + i) % 8]] = zhuanpanDoorOrder[(zhiShiDoorIdx + i) % 8];
                     }
                 }
+
+                // 排八神：值符随时干落宫，阳遁顺时针，阴遁逆时针
                 let godStartPalace = hourStemPalace;
                 if (godStartPalace === 5) godStartPalace = 2;
                 const godPath = dun === 'yang' ? luoShuPath8Clockwise : luoShuPath8CounterClockwise;
@@ -2362,13 +2616,17 @@ function getDayVoid(dayGanzhi) {
                     for (let i = 0; i < 8; i++) { shenPan[godPath[(godStartIdx + i) % 8]] = zhuanpanGodOrder[i]; }
                 }
             } else if (type === 'feipan') {
+                // ====== 飞盘排法 ======
+                // 飞盘与转盘不同：星、门、神按宫位序数飞布，而非洛书顺时针旋转
                 const numericalPath = [1,2,3,4,5,6,7,8,9];
                 const numericalPathReverse = [1,9,8,7,6,5,4,3,2];
                 const starPath = dun === 'yang' ? numericalPath : numericalPathReverse;
                 let starStartPalace = hourStemPalace;
+                // 甲时值符落宫为旬首遁干所在宫位
                 if (hourGanzhi[0] === '甲') { starStartPalace = zhiFuPalaceNum; }
                 let starStartIdx = starPath.indexOf(starStartPalace);
                 let zhiFuStarIdx = feipanStarOrder.indexOf(zhiFuStar);
+                // 飞盘九星：含天禽，共9星按宫位序飞布
                 if (starStartIdx > -1 && zhiFuStarIdx > -1) {
                     for (let i = 0; i < 9; i++) {
                         const currentPalace = starPath[(starStartIdx + i) % 9];
@@ -2376,6 +2634,8 @@ function getDayVoid(dayGanzhi) {
                         tianPanStars[currentPalace] = currentStar;
                     }
                 }
+
+                // 飞盘八门：不含5宫，8门按宫位序飞布
                 const hourStemIndex1Based = heavenlyStems.indexOf(hourStem) + 1;
                 if (dun === 'yang') {
                     const palaceNum = zhiFuPalaceNum + hourStemIndex1Based - 1;
@@ -2386,6 +2646,7 @@ function getDayVoid(dayGanzhi) {
                 }
                 if (zhiShiDoorPalaceNum === 5) zhiShiDoorPalaceNum = (dun === 'yang') ? 8 : 2;
                 let zhiShiDoorIdx = feipanDoorOrder.indexOf(zhiShiDoor);
+                // 门路径排除5宫（中宫无门）
                 const doorPath = dun === 'yang' ? numericalPath.filter(p=>p!==5) : numericalPathReverse.filter(p=>p!==5);
                 let doorStartIdx = doorPath.indexOf(zhiShiDoorPalaceNum);
                 if (doorStartIdx > -1 && zhiShiDoorIdx > -1) {
@@ -2395,16 +2656,22 @@ function getDayVoid(dayGanzhi) {
                         renPanDoors[currentPalace] = currentDoor;
                     }
                 }
+
+                // 飞盘九神：阳遁用 feipanGodOrderYang，阴遁用 feipanGodOrderYin，共9神
                 const godOrder = dun === 'yang' ? feipanGodOrderYang : feipanGodOrderYin;
                 const godPath = dun === 'yang' ? numericalPath : numericalPathReverse;
                 let godStartIdx = godPath.indexOf(hourStemPalace);
                 if (godStartIdx > -1) {
-                    for (let i = 0; i < 9; i++) { 
+                    for (let i = 0; i < 9; i++) {
                         const currentPalace = godPath[(godStartIdx + i) % 9];
                         shenPan[currentPalace] = godOrder[i];
                     }
                 }
             }
+
+            // ---- 步骤7：计算天盘天干 ----
+            // 天盘天干 = 天盘星的本位宫位对应的地盘天干
+            // 转盘天禽星寄宫时，天盘干显示为"寄宫干（中宫干）"
             const tianPanStems = {};
             for (let p = 1; p <= 9; p++) {
                 let starInPalace = tianPanStars[p];
@@ -2421,6 +2688,8 @@ function getDayVoid(dayGanzhi) {
                     }
                 }
             }
+
+            // ---- 步骤8：生成缩写映射 ----
             const tianPanStarsAbbr = {};
             const renPanDoorsAbbr = {};
             const shenPanAbbr = {};
@@ -2439,6 +2708,8 @@ function getDayVoid(dayGanzhi) {
             for (let p in shenPan) {
                 shenPanAbbr[p] = godAbbrMap[shenPan[p]] || shenPan[p];
             }
+
+            // ---- 返回完整排盘结果 ----
             return {
                  info: {
                     time: `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`,
@@ -2467,8 +2738,10 @@ function getDayVoid(dayGanzhi) {
         }
 
 
- /**
-         * 渲染奇门图表到页面 (传统文本格式) - [农历和节气修复版]
+        /**
+         * 渲染转盘/飞盘奇门排盘结果到页面（传统文本格式）
+         * @param {Object} data - calculateQimenPan() 返回的排盘数据
+         * @note 显示内容：四柱、遁局、值符值使、空亡、九宫格文本
          */
         function renderQimenChart(data) {
             const resultDiv = document.getElementById('qimenResult');
@@ -2554,13 +2827,23 @@ function getDayVoid(dayGanzhi) {
             renderQimenChart(qimenData);
         }
 
-        // ==== 纯 JS 奇门遁甲排盘引擎（替代 PyScript） ====
+        /* ========================================
+         * 纯 JS 奇门遁甲排盘引擎（拆补法/置闰法）
+         * 替代原 PyScript 实现，独立于转盘/飞盘引擎
+         * 使用 lunar.js 库进行农历计算
+         * ======================================== */
         const QimenDunjiaEngine = (function() {
+            /** @type {string[]} 十天干 */
             const GAN = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+            /** @type {string[]} 十二地支 */
             const ZHI = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+            /** @type {string[]} 九星：索引0为占位，1-9对应宫位 */
             const STARS = ['','天蓬','天芮','天冲','天辅','天禽','天心','天柱','天任','天英'];
+            /** @type {string[]} 八门：索引0为占位，5宫无门 */
             const DOORS = ['','休门','死门','伤门','杜门','','开门','惊门','生门','景门'];
+            /** @type {string[]} 八神顺序 */
             const GODS = ['值符','螣蛇','太阴','六合','白虎','玄武','九地','九天'];
+            /** @type {Object} 24节气局数映射（同 juShuYang/juShuYin 合并版） */
             const JU_MAP = {
                 '冬至':[1,7,4],'小寒':[2,8,5],'大寒':[3,9,6],
                 '立春':[8,5,2],'雨水':[9,6,3],'惊蛰':[1,7,4],
@@ -2572,6 +2855,12 @@ function getDayVoid(dayGanzhi) {
                 '立冬':[6,9,3],'小雪':[5,8,2],'大雪':[4,7,1]
             };
 
+            /**
+             * 计算太阳视黄经（用于精确判断节气交接时刻）
+             * @param {Date} dt - 日期时间
+             * @returns {number} 太阳视黄经（度，0-360）
+             * @note 基于 VSOP87 简化算法，精度约 0.01°
+             */
             function getLon(dt) {
                 let y = dt.getFullYear(), m = dt.getMonth()+1, d = dt.getDate();
                 let h = dt.getHours() + dt.getMinutes()/60.0 + dt.getSeconds()/3600.0;
@@ -2591,12 +2880,23 @@ function getDayVoid(dayGanzhi) {
                 return ((true_lon % 360) + 360) % 360;
             }
 
+            /**
+             * 根据符头地支判断三元
+             * @param {string} zhi - 符头地支
+             * @returns {number} 0=上元(子午卯酉), 1=中元(寅申巳亥), 2=下元(辰戌丑未)
+             */
             function getYuanByZhi(zhi) {
                 if (['子','午','卯','酉'].includes(zhi)) return 0;
                 if (['寅','申','巳','亥'].includes(zhi)) return 1;
                 return 2;
             }
 
+            /**
+             * 计算符头（旬首）干支
+             * @param {Object} lunar - lunar.js 的 Lunar 对象
+             * @returns {Object} { futouGZ: 符头干支字符串, futouZhi: 符头地支 }
+             * @note 符头 = 当日干支回推至甲日或己日，取其地支
+             */
             function calculateFutou(lunar) {
                 const gz = lunar.getEightChar();
                 const dayGan = gz.getDayGan();
@@ -2610,6 +2910,13 @@ function getDayVoid(dayGanzhi) {
                 return { futouGZ: futouGan + futouZhi, futouZhi: futouZhi };
             }
 
+            /**
+             * 获取当前严格节气（确保节气时刻已过）
+             * @param {Object} lunar - lunar.js 的 Lunar 对象
+             * @param {Date} currentDt - 当前时间
+             * @returns {Object} 严格节气对象
+             * @note 如果上一个节气时刻还未到，则取更前一个节气
+             */
             function getStrictJieQi(lunar, currentDt) {
                 const prev = lunar.getPrevJieQi(true);
                 const pSolar = prev.getSolar();
@@ -2620,6 +2927,13 @@ function getDayVoid(dayGanzhi) {
                 return prev;
             }
 
+            /**
+             * 获取同步后的八字（月柱以节气为准，日柱/时柱以实际日期为准）
+             * @param {Date} currentDt - 当前时间
+             * @param {Object} strictTermObj - 严格节气对象
+             * @returns {Object} { year, month, day, time, timeGan, timeZhi }
+             * @note 月柱取节气时刻的月干支，日柱和时柱取当前时刻的干支
+             */
             function getSyncedEightChar(currentDt, strictTermObj) {
                 try {
                     const ts = strictTermObj.getSolar();
@@ -2647,6 +2961,12 @@ function getDayVoid(dayGanzhi) {
                 }
             }
 
+            /**
+             * 拆补法参数计算：直接用当前节气和符头确定局数
+             * @param {Object} lunar - lunar.js 的 Lunar 对象
+             * @param {Object} strictTermObj - 严格节气对象
+             * @returns {Object} { termName, juNum, yuan, extraInfo }
+             */
             function getChaibuParams(lunar, strictTermObj) {
                 const stn = strictTermObj.getName();
                 const { futouGZ, futouZhi } = calculateFutou(lunar);
@@ -2656,6 +2976,16 @@ function getDayVoid(dayGanzhi) {
                 return { termName: termName, juNum: JU_MAP[termName][yuan], yuan: yuan, extraInfo: null };
             }
 
+            /**
+             * 置闰法参数计算：根据超神/接气判断是否需要置闰
+             * @param {Object} lunar - lunar.js 的 Lunar 对象
+             * @param {Date} currentDt - 当前时间
+             * @param {Object} strictTermObj - 严格节气对象
+             * @returns {Object} { termName, juNum, yuan, extraInfo: { futou, chaoshen, days, leaping, rawTerm } }
+             * @note 置闰规则：当超神超过9天时，需回退一个节气并置润
+             *   超神：符头在节气之前（节气未到已换局）
+             *   接气：符头在节气之后（节气已过才换局）
+             */
             function getZhirunParams(lunar, currentDt, strictTermObj) {
                 const { futouGZ, futouZhi } = calculateFutou(lunar);
                 const gz = lunar.getEightChar();
@@ -2682,18 +3012,43 @@ function getDayVoid(dayGanzhi) {
                 };
             }
 
+            /**
+             * 拆补法/置闰法排盘主函数
+             * @param {number} year - 公历年
+             * @param {number} month - 公历月(1-12)
+             * @param {number} day - 公历日
+             * @param {number} hour - 小时(0-23)
+             * @param {number} minute - 分钟
+             * @param {number} lat - 纬度（用于真太阳时修正）
+             * @param {number} lon - 经度（用于真太阳时修正）
+             * @param {string} method - "chaibu"(拆补法) 或 "zhirun"(置闰法)
+             * @returns {Object} 排盘结果，包含 fullGrid(九宫数据)、info(基本信息)等
+             *
+             * 计算流程：
+             * 1. 真太阳时修正（均时差 + 经度修正）
+             * 2. 获取严格节气，确定局数和元
+             * 3. 排地盘天干
+             * 4. 确定值符、值使
+             * 5. 排天盘星、门、神
+             * 6. 计算天盘天干
+             */
             function run(year, month, day, hour, minute, lat, lon, method) {
+                // 真太阳时修正：均时差(EoT) + 经度时差
                 const dtObj = new Date(year, month-1, day, hour, minute);
                 const doy = Math.floor((dtObj - new Date(year, 0, 0)) / 86400000);
                 const b = (2 * Math.PI / 365.24) * (doy - 81);
+                // 均时差公式（近似）
                 const eot = 9.87 * Math.sin(2*b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
+                // 真太阳时 = 当地平均太阳时 + EoT + 经度修正
                 const tst = new Date(dtObj.getTime() + (eot + (lon - 120) * 4) * 60000);
 
                 const solar = Solar.fromYmdHms(tst.getFullYear(), tst.getMonth()+1, tst.getDate(), tst.getHours(), tst.getMinutes(), 0);
                 const lunar = solar.getLunar();
 
+                // 获取严格节气（确保节气时刻已过）
                 const strictTermObj = getStrictJieQi(lunar, dtObj);
 
+                // 根据排法类型计算参数
                 let params;
                 if (method === 'zhirun') {
                     params = getZhirunParams(lunar, dtObj, strictTermObj);
@@ -2708,30 +3063,33 @@ function getDayVoid(dayGanzhi) {
                 const syncGz = getSyncedEightChar(dtObj, strictTermObj);
                 const finalGanzhiStr = `${syncGz.year}年 ${syncGz.month}月 ${syncGz.day}日 ${syncGz.time}时`;
 
+                // 判断实际阴阳遁
                 const realYang = ['冬至','小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种'].includes(finalTerm);
                 const stemsOrder = ['戊','己','庚','辛','壬','癸','丁','丙','乙'];
 
-                // 1. 地盘
+                // ---- 步骤1：排地盘天干 ----
                 const dp = {};
                 for (let i = 0; i < stemsOrder.length; i++) {
                     let pos;
                     if (realYang) {
-                        pos = ((ju - 1 + i) % 9) + 1;
+                        pos = ((ju - 1 + i) % 9) + 1; // 阳遁顺排
                     } else {
-                        pos = ((ju - 1 - i) % 9) + 1;
+                        pos = ((ju - 1 - i) % 9) + 1; // 阴遁逆排
                     }
                     if (pos <= 0) pos += 9;
                     dp[pos] = stemsOrder[i];
                 }
 
-                // 2. 旬首
+                // ---- 步骤2：确定旬首遁干和值符值使 ----
                 const hGan = syncGz.timeGan;
                 const hZhi = syncGz.timeZhi;
                 const hZhiIdx = ZHI.indexOf(hZhi);
                 const headOffset = ((hZhiIdx - GAN.indexOf(hGan)) % 12 + 12) % 12;
+                // 六甲旬首遁干映射：偏移量→遁干
                 const xunMap = {0:'戊', 10:'己', 8:'庚', 6:'辛', 4:'壬', 2:'癸'};
                 const xunGan = xunMap[headOffset] || '戊';
 
+                // 旬首遁干在地盘的落宫
                 let posXun = 1;
                 for (const [p, s] of Object.entries(dp)) {
                     if (s === xunGan) { posXun = parseInt(p); break; }
@@ -2740,24 +3098,26 @@ function getDayVoid(dayGanzhi) {
                 const zhifuStar = STARS[posXun];
                 const zhishiDoor = posXun !== 5 ? DOORS[posXun] : "死门";
 
-                // 3. 天盘与八神
-                const path = [1, 8, 3, 4, 9, 2, 7, 6];
+                // ---- 步骤3：排天盘与八神 ----
+                const path = [1, 8, 3, 4, 9, 2, 7, 6]; // 洛书8宫顺时针路径
                 const fullGrid = {};
                 for (let i = 1; i <= 9; i++) {
                     fullGrid[i] = { stem_d: dp[i] || "", stem_t: "", star: "", door: "", god: "" };
                 }
 
+                // 时干在地盘的落宫（甲时取旬首遁干）
                 const targetStem = hGan !== '甲' ? hGan : xunGan;
                 let posSkyDest = 1;
                 for (const [p, s] of Object.entries(dp)) {
                     if (s === targetStem) { posSkyDest = parseInt(p); break; }
                 }
+                // 中宫(5宫)寄坤2宫
                 if (posSkyDest === 5) posSkyDest = 2;
 
                 let startIdx = path.indexOf(posSkyDest);
                 if (startIdx === -1) startIdx = 0;
 
-                // 八神
+                // ---- 排八神：值符随时干落宫，阳遁顺时针，阴遁逆时针 ----
                 for (let i = 0; i < 8; i++) {
                     let pIdx;
                     if (realYang) {
@@ -2768,9 +3128,11 @@ function getDayVoid(dayGanzhi) {
                     fullGrid[path[pIdx]].god = GODS[i];
                 }
 
-                // 九星转动
+                // ---- 排天盘九星：值符星随时干落宫，按洛书8宫顺时针排布 ----
+                // 天禽星寄天芮(坤2宫)
                 const targetStarName = zhifuStar === "天禽" ? "天芮" : zhifuStar;
                 const baseStars = ["天蓬","天任","天冲","天辅","天英","天芮","天柱","天心"];
+                // 星→本位宫位映射
                 const starToOri = {"天蓬":1, "天任":8, "天冲":3, "天辅":4, "天英":9, "天芮":2, "天柱":7, "天心":6};
 
                 let sIdx = baseStars.indexOf(targetStarName);
@@ -2779,25 +3141,31 @@ function getDayVoid(dayGanzhi) {
                 for (let i = 0; i < 8; i++) {
                     const currStar = baseStars[(sIdx + i) % 8];
                     const currPalace = path[(startIdx + i) % 8];
+                    // 天芮星位标记"(禽)"表示天禽寄居
                     fullGrid[currPalace].star = currStar === "天芮" ? currStar + "(禽)" : currStar;
+                    // 天盘天干 = 星的本位宫位对应的地盘天干
                     const origP = starToOri[currStar];
                     let skyGan = dp[origP] || "";
+                    // 天芮(坤2)寄宫时，天盘干包含中宫干
                     if (origP === 2) skyGan += (dp[5] || "");
                     fullGrid[currPalace].stem_t = skyGan;
                 }
 
-                // 4. 门盘修正
+                // ---- 步骤4：排八门 ----
+                // 值使门从旬首宫位起步，按时支序数步进
                 const stepCount = ((hZhiIdx - headOffset) % 12 + 12) % 12;
                 let currDoorPos = posXun;
                 for (let i = 0; i < stepCount; i++) {
                     if (realYang) {
-                        currDoorPos = (currDoorPos % 9) + 1;
+                        currDoorPos = (currDoorPos % 9) + 1; // 阳遁顺步
                     } else {
-                        currDoorPos = currDoorPos === 1 ? 9 : currDoorPos - 1;
+                        currDoorPos = currDoorPos === 1 ? 9 : currDoorPos - 1; // 阴遁逆步
                     }
                 }
+                // 中宫门寄坤2宫
                 if (currDoorPos === 5) currDoorPos = 2;
 
+                // 八门按洛书8宫顺时针从值使落宫开始排布
                 const baseDoorsOrder = ["休门","生门","伤门","杜门","景门","死门","惊门","开门"];
                 let oriDoorIdx = baseDoorsOrder.indexOf(zhishiDoor);
                 if (oriDoorIdx === -1) oriDoorIdx = baseDoorsOrder.indexOf("死门");
@@ -2809,20 +3177,24 @@ function getDayVoid(dayGanzhi) {
                     fullGrid[path[(dIdx + i) % 8]].door = baseDoorsOrder[(oriDoorIdx + i) % 8];
                 }
 
+                // ---- 附加信息计算 ----
+                // 太阳视黄经（用于显示天球坐标）
                 const slon = getLon(tst);
+                // 天枢方位角
                 const dubhe = (slon + 90.0) % 360.0;
+                // 月将索引（基于太阳黄经）
                 const jiangIdx = ((10 - Math.floor(slon / 30)) % 12 + 12) % 12;
 
-                // 获取农历字符串
+                // 农历日期字符串
                 const lunarMonthStr = lunar.getMonthInChinese();
                 const lunarDayStr = lunar.getDayInChinese();
 
-                // 获取空亡
+                // 日空亡和时空亡
                 let dayXunKong = '', timeXunKong = '';
                 try { dayXunKong = lunar.getDayXunKong(); } catch(e) {}
                 try { timeXunKong = lunar.getTimeXunKong(); } catch(e) {}
 
-                // 获取节气精确时间
+                // 基准节气精确时间
                 let exactJieQi = '';
                 try {
                     const jSolar = strictTermObj.getSolar();
@@ -2830,6 +3202,8 @@ function getDayVoid(dayGanzhi) {
                 } catch(e) {
                     exactJieQi = '';
                 }
+
+                // ---- 返回完整排盘结果 ----
 
                 return {
                     method: method === 'zhirun' ? '置闰法' : '拆补法',
@@ -2848,7 +3222,17 @@ function getDayVoid(dayGanzhi) {
             return { run: run };
         })();
 
-        // ==== 拆补法/置闰法排盘渲染函数 ====
+        /* ========================================
+         * 拆补法/置闰法排盘渲染函数
+         * 将 QimenDunjiaEngine.run() 的结果渲染为九宫格 HTML
+         * ======================================== */
+
+        /**
+         * 渲染拆补法/置闰法排盘结果
+         * @param {Object} data - QimenDunjiaEngine.run() 返回的排盘数据
+         * @note 九宫格布局：4(巽) 9(离) 2(坤) / 3(震) 5(中) 7(兑) / 8(艮) 1(坎) 6(乾)
+         *   每个宫位内：神(左上)、天盘干(上中)、星(下中)、门(右下)、地盘干(左下)
+         */
         function renderDunjiaResult(data) {
             const container = document.getElementById('dunjiaResult');
             if (data.error) {
@@ -2858,7 +3242,7 @@ function getDayVoid(dayGanzhi) {
 
             let html = `<h2>奇门遁甲 (${data.method || '遁甲排盘'})</h2>`;
             html += `<div style="background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355;">`;
-            // 信息卡片1: 农历日期与干支
+            // ---- 信息卡片1: 农历日期与干支 ----
             html += `<div class="qimen-info">`;
             html += `<div style="text-align:left; font-size:1.2rem; margin-bottom:6px;">${data.lunar}</div>`;
             html += `<div style="text-align:left; font-size:0.95rem; margin-bottom:6px; letter-spacing:1px;">${data.ganzhi}</div>`;
@@ -2867,7 +3251,7 @@ function getDayVoid(dayGanzhi) {
             html += `</div>`;
             html += `<div style="text-align:left; font-size:0.75rem; margin-top:4px;">${data.exact_jieqi}</div>`;
 
-            // 置闰信息（仅置闰法显示）
+            // 置闰信息（仅置闰法显示：符头、超神/接气、积日、是否置润）
             if (data.zhirun_info) {
                 html += `<div style="background:rgba(140,35,24,0.05); padding:8px; border-radius:4px; margin-top:8px; border:1px dashed #d4c9b1;">`;
                 html += `<div style="display:flex; justify-content:space-between; font-size:0.85rem;">`;
@@ -2877,12 +3261,11 @@ function getDayVoid(dayGanzhi) {
                 html += `<div style="font-size:0.75rem; margin-top:4px;">积日: ${data.zhirun_info.days} 天${data.zhirun_info.leaping ? ' (已置润)' : ''}</div>`;
                 html += `</div>`;
             }
-            html += `</div>`;
-
-            // 信息卡片2: 局数与值符值使
-            html += `<div class="qimen-info">`;
+            // ---- 信息卡片2: 局数与值符值使（无背景） ----
+            html += `<div style="padding: 15px 0; margin-bottom: 20px;">`;
             html += `<table style="border-collapse:collapse;">`;
             html += `<colgroup><col style="width:auto;"><col style="width:130px;"></colgroup>`;
+            html += `<tr><td colspan="2" style="padding:0 0 6px 0;"><div style="border-top:1px solid #d4c9b1; opacity:0.3;"></div></td></tr>`;
             html += `<tr><td style="padding:0 0 6px 0; text-align:left; white-space:nowrap;">局数: ${data.ju.name}</td><td style="padding:0 0 6px 30px; text-align:left; white-space:nowrap;">月将: ${data.ju.jiang}</td></tr>`;
             html += `<tr><td style="padding:0 0 6px 0; text-align:left; white-space:nowrap;">值符: ${data.ju.zhifu}</td><td style="padding:0 0 6px 30px; text-align:left; white-space:nowrap;">值使: ${data.ju.zhishi}</td></tr>`;
             html += `<tr><td colspan="2" style="padding:8px 0 6px 0;"><div style="border-top:1px solid #d4c9b1; opacity:0.3;"></div></td></tr>`;
@@ -2891,7 +3274,7 @@ function getDayVoid(dayGanzhi) {
             html += `</table>`;
             html += `</div>`;
 
-            // 九宫格
+            // ---- 九宫格：按洛书排列 4(巽)9(离)2(坤)/3(震)5(中)7(兑)/8(艮)1(坎)6(乾) ----
             html += `<div class="dunjia-grid">`;
             const mapOrder = [4, 9, 2, 3, 5, 7, 8, 1, 6];
             mapOrder.forEach(idx => {
@@ -2918,13 +3301,19 @@ function getDayVoid(dayGanzhi) {
             container.innerHTML = html;
         }
 
-        // ==== 事件监听器 (最终修正版) ====
+        /* ========================================
+         * 事件监听器与页面初始化
+         * 绑定四个排盘按钮的点击事件，初始化日期选择器
+         * ======================================== */
         document.addEventListener('DOMContentLoaded', () => {
             const qimenZhuanpanBtn = document.getElementById('qimenZhuanpanBtn');
             const qimenFeipanBtn = document.getElementById('qimenFeipanBtn');
             const customTimeInput = document.getElementById('customTime');
 
-            // 根据内容动态调整输入框宽度
+            /**
+             * 根据输入内容动态调整输入框宽度
+             * 通过创建临时 span 元素测量文本宽度
+             */
             function resizeInputWidth() {
                 const val = customTimeInput.value || '';
                 const sizer = document.createElement('span');
@@ -2938,7 +3327,7 @@ function getDayVoid(dayGanzhi) {
             const datePickerPopup = document.getElementById('datePickerPopup');
             const datePickerContainer = document.getElementById('datePickerContainer');
 
-            // 格式化公历日期（datetime-local 格式）
+            /** 格式化公历日期为 datetime-local 输入框格式 (YYYY-MM-DDTHH:mm) */
             function formatSolar(date) {
                 const y = date.getFullYear();
                 const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -2948,7 +3337,7 @@ function getDayVoid(dayGanzhi) {
                 return `${y}-${m}-${d}T${h}:${min}`;
             }
 
-            // 格式化公历显示文本
+            /** 格式化公历日期为显示文本 (YYYY-MM-DD HH:mm) */
             function formatSolarDisplay(date) {
                 const y = date.getFullYear();
                 const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -2958,7 +3347,12 @@ function getDayVoid(dayGanzhi) {
                 return `${y}-${m}-${d} ${h}:${min}`;
             }
 
-            // 格式化农历显示文本
+            /**
+             * 格式化农历显示文本
+             * @param {Object} lunarInfo - 农历信息对象 { ganZhi, lunar }
+             * @param {Date} date - 公历日期（用于取时辰）
+             * @returns {string} 农历格式文本，如"甲子年 正月初一 子时 30分"
+             */
             function formatLunarDisplay(lunarInfo, date) {
                 const lz = lunarInfo.ganZhi;
                 const lm = lunarInfo.lunar;
@@ -2967,14 +3361,14 @@ function getDayVoid(dayGanzhi) {
                 return `${lz.year.full}年 ${lm.isLeap ? '闰' : ''}${QimenDatePicker.LUNAR_MONTHS[lm.month - 1]}月${QimenDatePicker.LUNAR_DAYS[lm.day - 1]} ${hourZhi}时 ${minute}分`;
             }
 
-            // 设置当前时间
+            // 初始化当前时间
             const now = new Date();
             const nowSolar = formatSolar(now);
             customTimeInput.setAttribute('data-solar-value', nowSolar);
             customTimeInput.value = formatSolarDisplay(now);
             resizeInputWidth();
 
-            // 获取输入框的公历时间值（用于排盘计算）
+            /** 获取输入框的公历时间值（用于排盘计算） */
             function getSolarValue() {
                 return customTimeInput.getAttribute('data-solar-value') || nowSolar;
             }
@@ -3040,6 +3434,7 @@ function getDayVoid(dayGanzhi) {
             // 页面加载后自动初始化数据
             initializeAndParseData();
             
+            // ---- 转盘/飞盘按钮事件 ----
             qimenZhuanpanBtn.addEventListener('click', () => {
                 const timeStr = getSolarValue();
                 const dateObject = new Date(timeStr);
@@ -3051,10 +3446,14 @@ function getDayVoid(dayGanzhi) {
                 generateAndDisplayQimenChart(dateObject, 'feipan');
             });
 
-            // ==== 拆补法/置闰法按钮事件 ====
+            // ---- 拆补法/置闰法按钮事件 ----
             const chaibuBtn = document.getElementById('chaibuBtn');
             const zhirunBtn = document.getElementById('zhirunBtn');
 
+            /**
+             * 执行拆补法/置闰法排盘
+             * @param {string} method - "chaibu" 或 "zhirun"
+             */
             function runDunjia(method) {
                 const timeStr = getSolarValue();
                 // 隐藏茅山排盘结果，显示遁甲排盘结果
@@ -3093,13 +3492,24 @@ function getDayVoid(dayGanzhi) {
 // ==== ★ 2. 新增的核心函数 ★ ====
 /**
  * @name buildLunarMonthMap
- * @desc 在所有数据加载后，构建全局的农历月地图 (核心修复)
+ * @desc 在所有数据加载后，构建全局的农历月地图（核心修复）
  * 严格遵循 GB/T 33661-2017 标准
+ *
+ * 算法流程：
+ * 1. 从 fullData 中提取所有朔日(Q0)和中气(Z-terms)
+ * 2. 以相邻朔日划分农历月时间区间
+ * 3. 将中气分配到对应的农历月（有中气为常规月，无中气为闰月）
+ * 4. 以包含冬至(Z11)的月为锚点，定为十一月
+ * 5. 从锚点向前/向后递推月序号，处理闰月
+ * 6. 将 TDB 时间转换为 BJT(北京时间) 日数，存储到全局变量 lunarMonthData
+ *
+ * @note 农历月序号规则：包含冬至的月为十一月，依次递推
+ * @note 闰月规则：不含中气的月为闰月，月序号与前一个月相同
  */
 function buildLunarMonthMap() {
     console.log("正在构建农历月地图...");
-    const allQ0 = []; // 存储所有 朔 (New Moons)
-    const allZ = [];  // 存储所有 中气 (Zhongqi)
+    const allQ0 = []; // 存储所有朔日 (New Moons)
+    const allZ = [];  // 存储所有中气 (Zhongqi)
     const years = Object.keys(fullData).sort((a, b) => parseInt(a) - parseInt(b));
 
     // 1. 从 fullData 中提取所有 Q0 和 Z-terms
@@ -3123,7 +3533,7 @@ function buildLunarMonthMap() {
         return;
     }
 
-    // 2. 创建农历月时间间隔 (从一个Q0到下一个Q0) (TDB)
+    // ---- 步骤2：以相邻朔日划分农历月时间区间 ----
     const months = [];
     for (let i = 0; i < allQ0.length - 1; i++) {
         months.push({
@@ -3135,7 +3545,7 @@ function buildLunarMonthMap() {
         });
     }
     
-    // 3. 将中气分配到对应的农历月
+    // ---- 步骤3：将中气分配到对应的农历月（有中气=常规月，无中气=闰月） ----
     // (使用 GBT-33661 用于判断闰月的 Z12, Z1-Z10，即您已有的 zhongqiKeys)
     const zhongqiForLeap = allZ.filter(z => zhongqiKeys.includes(z.key));
     for (const z of zhongqiForLeap) {
@@ -3147,7 +3557,7 @@ function buildLunarMonthMap() {
         }
     }
 
-    // 4. 找到锚点 (第一个包含Z11-冬至的月)
+    // ---- 步骤4：找到锚点（包含冬至Z11的月定为十一月） ----
     const dongzhiEvents = allZ.filter(z => z.key === 'Z11a' || z.key === 'Z11b');
     let anchorIndex = -1;
     for (const z of dongzhiEvents) {
@@ -3164,7 +3574,7 @@ function buildLunarMonthMap() {
         return;
     }
     
-    // 5. 向前填充（处理闰月）
+    // ---- 步骤5：从锚点向前递推月序号（处理闰月） ----
     let lastAssignedNum = 11;
     for (let i = anchorIndex + 1; i < months.length; i++) {
         // 检查是否为下一个冬至月
@@ -3183,7 +3593,7 @@ function buildLunarMonthMap() {
         }
     }
 
-    // 6. 向后填充（处理闰月）
+    // ---- 步骤6：从锚点向后递推月序号（处理闰月） ----
     let nextAssignedNum = 11;
     for (let i = anchorIndex - 1; i >= 0; i--) {
         const isPrevDongzhiMonth = dongzhiEvents.some(z => z.jdTdb >= months[i].jdTdbStart && z.jdTdb < months[i].jdTdbEnd);
@@ -3203,8 +3613,8 @@ function buildLunarMonthMap() {
         }
     }
     
-    // 7. 格式化并存储到全局变量
-    // ★ 修复：增加了 bjtDayNumStart 和 bjtDayNumEnd
+    // ---- 步骤7：格式化并存储到全局变量 lunarMonthData ----
+    // 将 TDB 时间转换为 BJT(北京时间) 日数，用于日期判断
     lunarMonthData = [];
     for (const month of months) {
         if (month.monthNum) {

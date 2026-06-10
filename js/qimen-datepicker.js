@@ -4,6 +4,18 @@
  * 日历网格视图：显示公历日期 + 农历日期 + 节气
  */
 class QimenDatePicker {
+  /**
+   * 构造函数
+   * @param {HTMLElement|string} container - 容器元素或选择器
+   * @param {Object} options - 配置项
+   * @param {string} [options.mode='solar'] - 初始模式：'solar'(公历) 或 'lunar'(农历)
+   * @param {string} [options.style='ink'] - 主题样式：'ink'(水墨) 或 'classic'(经典)
+   * @param {Date} [options.value=null] - 初始选中日期
+   * @param {Date} [options.minDate] - 最小可选日期
+   * @param {Date} [options.maxDate] - 最大可选日期
+   * @param {Function} [options.onChange] - 日期变化回调
+   * @param {Function} [options.onConfirm] - 确认选择回调
+   */
   constructor(container, options = {}) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
     this.options = {
@@ -33,6 +45,13 @@ class QimenDatePicker {
     this.init();
   }
 
+  /**
+   * 农历信息编码表 (1900-2100年)
+   * 每个数值编码了对应年份的农历月大小和闰月信息：
+   * - Bit 0-3: 闰月月份(0=无闰月, 1-12=闰几月)
+   * - Bit 4-15: 1-12月大小(1=30天大月, 0=29天小月)，从高位到低位对应1-12月
+   * - Bit 16: 闰月大小(1=30天, 0=29天)
+   */
   static LUNAR_INFO = [
     0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
     0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
@@ -70,6 +89,12 @@ class QimenDatePicker {
   ];
   static WEEK_DAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
+  /**
+   * 获取农历年总天数（含闰月）
+   * 基础天数348 + 每个大月多1天 + 闰月天数
+   * @param {number} year - 农历年
+   * @returns {number} 该农历年的总天数
+   */
   _getLunarYearDays(year) {
     let sum = 348;
     for (let i = 0x8000; i > 0x8; i >>= 1) {
@@ -78,6 +103,7 @@ class QimenDatePicker {
     return sum + this._getLeapMonthDays(year);
   }
 
+  /** 获取闰月天数（29或30天） */
   _getLeapMonthDays(year) {
     if (this._getLeapMonth(year)) {
       return (QimenDatePicker.LUNAR_INFO[year - 1900] & 0x10000) ? 30 : 29;
@@ -85,14 +111,29 @@ class QimenDatePicker {
     return 0;
   }
 
+  /** 获取闰月月份（0表示无闰月，1-12表示闰几月） */
   _getLeapMonth(year) {
     return QimenDatePicker.LUNAR_INFO[year - 1900] & 0xf;
   }
 
+  /**
+   * 获取农历月天数（29或30天）
+   * @param {number} year - 农历年
+   * @param {number} month - 农历月(1-12)
+   * @returns {number} 该月天数
+   */
   _getLunarMonthDays(year, month) {
     return (QimenDatePicker.LUNAR_INFO[year - 1900] & (0x10000 >> month)) ? 30 : 29;
   }
 
+  /**
+   * 公历转农历
+   * @param {number} year - 公历年
+   * @param {number} month - 公历月(1-12)
+   * @param {number} day - 公历日
+   * @returns {Object} { year, month, day, isLeap, leapMonth }
+   * @note 基准日期：1900年1月31日（农历正月初一）
+   */
   _solarToLunar(year, month, day) {
     const targetDate = new Date(year, month - 1, day);
     // 使用UTC计算偏移量，避免历史时区/夏令时导致的日期偏差
@@ -125,6 +166,15 @@ class QimenDatePicker {
     return { year: lunarYear, month: i, day: offset + 1, isLeap: isLeap && i === leapMonth, leapMonth: leapMonth };
   }
 
+  /**
+   * 农历转公历（近似计算）
+   * @param {number} lunarYear - 农历年
+   * @param {number} lunarMonth - 农历月(1-12)
+   * @param {number} lunarDay - 农历日
+   * @param {boolean} isLeap - 是否闰月
+   * @returns {Date} 对应的公历日期
+   * @note 基准：1900年1月30日（农历系统起始点）
+   */
   _lunarToSolarApprox(lunarYear, lunarMonth, lunarDay, isLeap = false) {
     // 使用与solarlunar一致的算法：基准日期1900年1月30日（农历正月初一的前一天）
     let offset = 0;
@@ -152,6 +202,12 @@ class QimenDatePicker {
     return approx;
   }
 
+  /**
+   * 获取指定日期的节气名称（近似判断）
+   * @param {Date} date - 公历日期
+   * @returns {string|null} 节气名称，无节气返回null
+   * @note 使用固定日期表+年份偏移修正进行近似判断
+   */
   _getJieQiForDate(date) {
     const y = date.getFullYear();
     const m = date.getMonth() + 1;
@@ -179,6 +235,14 @@ class QimenDatePicker {
     return null;
   }
 
+  /**
+   * 判断某日是否为指定节气日（年份偏移修正）
+   * @param {number} y - 公历年
+   * @param {number} m - 公历月
+   * @param {number} d - 公历日
+   * @param {string} name - 节气名称
+   * @returns {boolean}
+   */
   _isJieQiDay(y, m, d, name) {
     const offset = ((y - 2000) * 0.24) | 0;
     const idx = QimenDatePicker.JIE_QI.indexOf(name);
@@ -191,6 +255,10 @@ class QimenDatePicker {
     return d === adjustedDay || d === baseDay;
   }
 
+  /**
+   * 获取节日名称（公历/农历节日）
+   * @returns {string|null} 节日名称
+   */
   _getFestival(solarY, solarM, solarD, lunarM, lunarD, lunarYear) {
     const solarFestivals = { '1-1': '元旦', '2-14': '情人节', '3-8': '妇女节', '5-1': '劳动节',
       '6-1': '儿童节', '10-1': '国庆节', '12-25': '圣诞节' };
@@ -212,6 +280,12 @@ class QimenDatePicker {
     return null;
   }
 
+  /**
+   * 获取年干支（以公历年份近似计算）
+   * @param {number} year - 公历年
+   * @returns {Object} { gan, zhi, full }
+   * @note 甲子年 = 公元4年，天干=(年-4)%10，地支=(年-4)%12
+   */
   _getYearGanZhi(year) {
     const ganIndex = (year - 4) % 10;
     const zhiIndex = (year - 4) % 12;
@@ -220,6 +294,13 @@ class QimenDatePicker {
     return { gan, zhi, full: gan + zhi };
   }
 
+  /**
+   * 获取月干支（以公历年月近似计算）
+   * @param {number} year - 公历年
+   * @param {number} month - 公历月(1-12)
+   * @returns {Object} { gan, zhi, full }
+   * @note 月干 = (年干×2 + 月) % 10，月支 = (月+1) % 12
+   */
   _getMonthGanZhi(year, month) {
     const yearGan = (year - 4) % 10;
     const ganIndex = (yearGan * 2 + month) % 10;
@@ -229,6 +310,11 @@ class QimenDatePicker {
     return { gan, zhi, full: gan + zhi };
   }
 
+  /**
+   * 获取日干支（基于1900年1月1日为甲戌日推算）
+   * @param {Date} date - 公历日期
+   * @returns {Object} { gan, zhi, full }
+   */
   _getDayGanZhi(date) {
     const diff = Math.floor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(1900, 0, 1)) / 86400000);
     const gan = QimenDatePicker.TIAN_GAN[(diff + 10) % 10];
@@ -236,6 +322,13 @@ class QimenDatePicker {
     return { gan, zhi, full: gan + zhi };
   }
 
+  /**
+   * 获取时干支（五鼠遁元法：根据日干推算时干）
+   * @param {Date} date - 公历日期
+   * @param {number} hour - 小时(0-23)
+   * @returns {Object} { gan, zhi, full }
+   * @note 时支 = (hour+1)/2 % 12，时干由日干按五鼠遁元规则查表
+   */
   _getHourGanZhi(date, hour) {
     const dayGan = this._getDayGanZhi(date).gan;
     const dayGanIndex = QimenDatePicker.TIAN_GAN.indexOf(dayGan);
@@ -258,6 +351,15 @@ class QimenDatePicker {
     return { gan, zhi, full: gan + zhi };
   }
 
+  /**
+   * 获取指定日期的完整农历信息（含干支、生肖）
+   * @param {Date} date - 公历日期
+   * @returns {Object} { solar, lunar, ganZhi, shengXiao }
+   *   solar: 公历信息 { year, month, day, hour, minute }
+   *   lunar: 农历信息 { year, month, day, isLeap, leapMonth, display }
+   *   ganZhi: 四柱干支 { year, month, day, hour }
+   *   shengXiao: 生肖
+   */
   _getLunarDate(date) {
     const year = date.getFullYear(), month = date.getMonth() + 1, day = date.getDate();
     const hour = date.getHours(), minute = date.getMinutes();
@@ -280,10 +382,15 @@ class QimenDatePicker {
     };
   }
 
+  /** 初始化组件：执行首次渲染 */
   init() {
     this.render();
   }
 
+  /**
+   * 主渲染方法：构建日期选择器 DOM 结构
+   * 包含：模式切换标签(公历/农历)、日历网格、时间选择器、确认按钮
+   */
   render() {
     this.container.innerHTML = `
       <div class="qimen-datepicker">
@@ -313,6 +420,7 @@ class QimenDatePicker {
     this.bindEvents();
   }
 
+  /** 根据当前模式渲染对应的日历网格 */
   _renderCalendarGrid() {
     if (this.currentMode === 'solar') {
       return this._renderSolarGrid();
@@ -321,6 +429,11 @@ class QimenDatePicker {
     }
   }
 
+  /**
+   * 渲染公历模式日历网格
+   * 计算当月首日星期、天数，填充上月尾部和下月头部
+   * @returns {string} 日历网格 HTML
+   */
   _renderSolarGrid() {
     const y = this.viewYear;
     const m = this.viewMonth;
@@ -380,6 +493,11 @@ class QimenDatePicker {
     `;
   }
 
+  /**
+   * 渲染农历模式日历网格
+   * 以农历月为单位，计算每月天数和闰月
+   * @returns {string} 日历网格 HTML
+   */
   _renderLunarGrid() {
     const ly = this.viewLunarYear;
     const lm = this.viewLunarMonth;
@@ -457,6 +575,16 @@ class QimenDatePicker {
     `;
   }
 
+  /**
+   * 构建公历日期单元格
+   * @param {number} year - 年
+   * @param {number} month - 月(0-11)
+   * @param {number} day - 日
+   * @param {boolean} isOtherMonth - 是否非当月日期
+   * @param {boolean} isSelected - 是否选中
+   * @param {boolean} isToday - 是否今天
+   * @returns {string} 单元格 HTML
+   */
   _buildSolarCell(year, month, day, isOtherMonth, isSelected = false, isToday = false) {
     const date = new Date(year, month, day);
     const lunar = this._solarToLunar(year, month + 1, day);
@@ -487,6 +615,17 @@ class QimenDatePicker {
     };
   }
 
+  /**
+   * 构建农历日期单元格
+   * @param {number} solarY - 公历年
+   * @param {number} solarM - 公历月(1-12)
+   * @param {number} solarD - 公历日
+   * @param {Object} lunarInfo - 农历信息
+   * @param {boolean} isOtherMonth - 是否非当月
+   * @param {boolean} isSelected - 是否选中
+   * @param {boolean} isToday - 是否今天
+   * @returns {string} 单元格 HTML
+   */
   _buildLunarCell(solarY, solarM, solarD, lunarInfo, isOtherMonth, isSelected = false, isToday = false) {
     const date = new Date(solarY, solarM, solarD);
     const jieqi = this._getJieQiForDate(date);
@@ -518,6 +657,10 @@ class QimenDatePicker {
     };
   }
 
+  /**
+   * 渲染时间选择器（时辰+分钟下拉框）
+   * @returns {string} 时间选择器 HTML
+   */
   _renderTimePicker() {
     const h = String(this.currentDate.getHours()).padStart(2, '0');
     const mi = String(this.currentDate.getMinutes()).padStart(2, '0');
@@ -540,6 +683,7 @@ class QimenDatePicker {
     `;
   }
 
+  /** 生成小时选项列表 (0-23) */
   _generateHourOptions(selected) {
     let html = '';
     for (let h = 0; h < 24; h++) {
@@ -550,6 +694,7 @@ class QimenDatePicker {
     return html;
   }
 
+  /** 生成分钟选项列表 (0-59，步长5) */
   _generateMinuteOptions(selected) {
     let html = '';
     for (let m = 0; m < 60; m++) {
@@ -587,6 +732,10 @@ class QimenDatePicker {
     }
   };
 
+  /**
+   * 渲染组件内联 CSS 样式
+   * @returns {string} <style> 标签 HTML
+   */
   _renderStyles() {
     const s = QimenDatePicker.STYLE_PRESETS[this.currentStyle] || QimenDatePicker.STYLE_PRESETS.ink;
     
@@ -1012,6 +1161,7 @@ class QimenDatePicker {
     </style>`;
   }
 
+  /** 更新信息面板（显示干支、农历日期、节气等） */
   updateInfoPanel() {
     this.lunarInfo = this._getLunarDate(this.currentDate);
     if (this.options.onChange) {
@@ -1019,6 +1169,7 @@ class QimenDatePicker {
     }
   }
 
+  /** 绑定全局事件：模式切换、导航按钮、确认按钮 */
   bindEvents() {
     this.container.querySelectorAll('.qdp-tab').forEach(tab => {
       tab.addEventListener('click', () => this.switchMode(tab.dataset.mode));
@@ -1043,6 +1194,7 @@ class QimenDatePicker {
     this.container.querySelector('.qdp-btn-confirm')?.addEventListener('click', () => this.confirm());
   }
 
+  /** 绑定日历网格点击事件：日期选择 */
   bindCalendarEvents() {
     this.container.querySelectorAll('.qdp-nav-btn').forEach(btn => {
       btn.addEventListener('click', () => this._navigate(btn.dataset.action));
@@ -1083,11 +1235,17 @@ class QimenDatePicker {
     });
   }
 
+  /** 绑定下拉选择框的 change 事件 */
   _bindSelectChange(id, handler) {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', (e) => handler(e.target.value));
   }
 
+  /**
+   * 显示年/月选择面板
+   * @param {HTMLElement} el - 触发元素
+   * @param {string} type - 'year' 或 'month'
+   */
   _showPicker(el, type) {
     this._closePicker();
     el.classList.add('active');
@@ -1111,6 +1269,11 @@ class QimenDatePicker {
     this._bindPickerEvents();
   }
 
+  /**
+   * 构建年/月选择面板内容
+   * @param {string} type - 'year' 或 'month'
+   * @returns {string} 面板 HTML
+   */
   _buildPickerPanel(type) {
     const s = QimenDatePicker.STYLE_PRESETS[this.currentStyle];
     const isLunar = this.currentMode === 'lunar';
@@ -1144,15 +1307,16 @@ class QimenDatePicker {
         if (isLunar) {
           label = QimenDatePicker.LUNAR_MONTHS[m - 1] + '月';
           sel = m === currentM && !this.viewIsLeap ? ' selected' : '';
-          if (m === leapMonth) {
-            const leapSel = this.viewIsLeap ? ' selected' : '';
-            cells += `<div class="qdp-picker-cell${leapSel}" data-val="${m}" data-leap="1">闰${label}</div>`;
-          }
         } else {
           label = m + '月';
           sel = m === currentM ? ' selected' : '';
         }
         cells += `<div class="qdp-picker-cell${sel}" data-val="${m}">${label}</div>`;
+        // 闰月排在对应月份之后
+        if (isLunar && m === leapMonth) {
+          const leapSel = this.viewIsLeap ? ' selected' : '';
+          cells += `<div class="qdp-picker-cell${leapSel}" data-val="${m}" data-leap="1">闰${label}</div>`;
+        }
       }
       cellsHTML = cells;
     }
@@ -1168,6 +1332,7 @@ class QimenDatePicker {
       </div>`;
   }
 
+  /** 绑定选择面板内的点击事件 */
   _bindPickerEvents() {
     const panel = this.container.querySelector('.qdp-picker-panel');
     if (!panel) return;
@@ -1208,6 +1373,7 @@ class QimenDatePicker {
     });
   }
 
+  /** 关闭年/月选择面板 */
   _closePicker() {
     this.container.querySelectorAll('.qdp-pickable.active').forEach(el => el.classList.remove('active'));
     if (this._savedCalendarHTML) {
@@ -1219,6 +1385,7 @@ class QimenDatePicker {
     this._pickerTriggerEl = null;
   }
 
+  /** 选择年份并刷新日历 */
   _pickYear(year) {
     if (this.currentMode === 'solar') { this.viewYear = year; }
     else { this.viewLunarYear = year; }
@@ -1226,6 +1393,11 @@ class QimenDatePicker {
     this.refreshCalendar();
   }
 
+  /**
+   * 选择月份并刷新日历
+   * @param {number} month - 月份
+   * @param {boolean} isLeap - 农历模式下是否选择闰月
+   */
   _pickMonth(month, isLeap) {
     if (this.currentMode === 'solar') { this.viewMonth = month - 1; }
     else { this.viewLunarMonth = month; this.viewIsLeap = isLeap; }
@@ -1233,6 +1405,10 @@ class QimenDatePicker {
     this.refreshCalendar();
   }
 
+  /**
+   * 导航操作：前/后翻月或翻年
+   * @param {string} action - 'prev-month'|'next-month'|'prev-year'|'next-year'
+   */
   _navigate(action) {
     if (this.currentMode === 'solar') {
       switch (action) {
@@ -1252,6 +1428,7 @@ class QimenDatePicker {
     this.refreshCalendar();
   }
 
+  /** 前翻一月 */
   navigatePrev() {
     if (this.currentMode === 'solar') {
       if (this.viewMonth === 0) { this.viewMonth = 11; this.viewYear--; }
@@ -1275,6 +1452,7 @@ class QimenDatePicker {
     this.refreshCalendar();
   }
 
+  /** 后翻一月 */
   navigateNext() {
     if (this.currentMode === 'solar') {
       if (this.viewMonth === 11) { this.viewMonth = 0; this.viewYear++; }
@@ -1292,6 +1470,7 @@ class QimenDatePicker {
     this.refreshCalendar();
   }
 
+  /** 刷新日历网格（不重建整个 DOM，仅更新网格区域） */
   refreshCalendar() {
     const calendar = this.container.querySelector('.qdp-calendar');
     if (calendar) {
@@ -1300,6 +1479,12 @@ class QimenDatePicker {
     }
   }
 
+  /**
+   * 选择公历日期
+   * @param {number} year - 年
+   * @param {number} month - 月(0-11)
+   * @param {number} day - 日
+   */
   selectDate(year, month, day) {
     const date = new Date(year, month, day, this.currentDate.getHours(), this.currentDate.getMinutes());
     if (date < this.options.minDate || date > this.options.maxDate) return;
@@ -1309,17 +1494,26 @@ class QimenDatePicker {
     this.refreshCalendar();
   }
 
+  /**
+   * 选择农历日期（自动转换为公历）
+   * @param {number} lunarYear - 农历年
+   * @param {number} lunarMonth - 农历月
+   * @param {number} lunarDay - 农历日
+   * @param {boolean} isLeap - 是否闰月
+   */
   selectLunarDate(lunarYear, lunarMonth, lunarDay, isLeap = false) {
     const solarDate = this._lunarToSolarApprox(lunarYear, lunarMonth, lunarDay, isLeap);
     this.selectDate(solarDate.getFullYear(), solarDate.getMonth(), solarDate.getDate());
   }
 
+  /** 小时变更处理 */
   _onHourChange(hour) {
     this.currentDate.setHours(hour);
     this._updateTimeDisplay();
     this.updateInfoPanel();
   }
 
+  /** 分钟变更处理 */
   _onMinuteChange(minute) {
     this.currentDate.setMinutes(minute);
     this._updateTimeDisplay();
@@ -1327,6 +1521,7 @@ class QimenDatePicker {
   }
 
   // 点击时间显示 → 展开为下拉选择
+  /** 展开时间选择下拉框 */
   _expandTimeSelects() {
     const display = document.getElementById('qdpTimeDisplay');
     const selects = document.getElementById('qdpTimeSelects');
@@ -1350,6 +1545,7 @@ class QimenDatePicker {
   }
 
   // 收起下拉，回到实时显示
+  /** 折叠时间选择下拉框（恢复显示模式） */
   _collapseTimeSelects() {
     const display = document.getElementById('qdpTimeDisplay');
     const selects = document.getElementById('qdpTimeSelects');
@@ -1359,11 +1555,13 @@ class QimenDatePicker {
     this._updateTimeDisplay();
   }
 
+  /** 标记时间为手动修改状态（停止自动同步） */
   _markManualTime() {
     this._timeManuallyChanged = true;
     document.getElementById('qdpTimeDisplay')?.classList.add('manual');
   }
 
+  /** 更新时间显示文本 */
   _updateTimeDisplay() {
     const hEl = document.getElementById('qdpTimeH');
     const mEl = document.getElementById('qdpTimeM');
@@ -1372,6 +1570,7 @@ class QimenDatePicker {
     this._updateFestivalCountdown();
   }
 
+  /** 更新节日倒计时显示 */
   _updateFestivalCountdown() {
     const el = document.getElementById('qdpFestivalCountdown');
     if (!el) return;
@@ -1384,6 +1583,10 @@ class QimenDatePicker {
     }
   }
 
+  /**
+   * 获取最近的下一个节日信息
+   * @returns {Object|null} { name, date, daysLeft }
+   */
   _getNextFestival() {
     const today = new Date();
     const y = today.getFullYear(), m = today.getMonth() + 1, d = today.getDate();
@@ -1425,7 +1628,10 @@ class QimenDatePicker {
     return null;
   }
 
-  // 实时同步当前时间（弹窗打开期间每秒更新显示）
+  /**
+   * 启动实时时间同步（弹窗打开期间每秒更新显示）
+   * 用户手动修改时间后自动停止同步
+   */
   startAutoSync() {
     this._timeManuallyChanged = false;
     document.getElementById('qdpTimeDisplay')?.classList.remove('manual');
@@ -1438,6 +1644,7 @@ class QimenDatePicker {
     this._autoSyncTimer = setInterval(() => this._syncToNow(), 1000);
   }
 
+  /** 停止实时时间同步 */
   stopAutoSync() {
     if (this._autoSyncTimer) {
       clearInterval(this._autoSyncTimer);
@@ -1445,6 +1652,7 @@ class QimenDatePicker {
     }
   }
 
+  /** 同步到当前时间（仅在未手动修改时生效） */
   _syncToNow() {
     // 用户手动选过时间则不同步
     if (this._timeManuallyChanged) return;
@@ -1454,6 +1662,10 @@ class QimenDatePicker {
     this._updateTimeDisplay();
   }
 
+  /**
+   * 切换公历/农历模式
+   * @param {string} mode - 'solar' 或 'lunar'
+   */
   switchMode(mode) {
     if (mode === this.currentMode) return;
     this.currentMode = mode;
@@ -1484,6 +1696,7 @@ class QimenDatePicker {
     }
   }
 
+  /** 设置为今天日期 */
   setToday() {
     const today = new Date();
     this.viewYear = today.getFullYear();
@@ -1497,6 +1710,7 @@ class QimenDatePicker {
     this.selectDate(today.getFullYear(), today.getMonth(), today.getDate());
   }
 
+  /** 确认选择，触发 onConfirm 回调 */
   confirm() {
     // 如果下拉选择处于展开状态，从 select 读取值
     const selects = document.getElementById('qdpTimeSelects');
@@ -1512,6 +1726,10 @@ class QimenDatePicker {
     }
   }
 
+  /**
+   * 获取当前选中值
+   * @returns {Object} { date: Date, lunar: Object }
+   */
   getValue() {
     return {
       date: this.currentDate,
@@ -1519,6 +1737,10 @@ class QimenDatePicker {
     };
   }
 
+  /**
+   * 设置当前选中日期
+   * @param {Date} date - 要设置的日期
+   */
   setValue(date) {
     this.currentDate = new Date(date);
     this.viewYear = this.currentDate.getFullYear();
