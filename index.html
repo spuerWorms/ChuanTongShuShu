@@ -2552,7 +2552,7 @@ function getDayVoid(dayGanzhi) {
             let zhiFuPalaceNum = parseInt(Object.keys(diPan).find(p => diPan[p] === xunShouHiddenStem));
             const zhiFuStar = palacesInfo[zhiFuPalaceNum].star;
             let zhiShiDoor = palacesInfo[zhiFuPalaceNum].door;
-            // 中宫(5宫)寄宫：阳遁寄坤2宫(生门)，阴遁寄艮8宫(死门)
+            // 中宫(5宫)寄宫：阳遁寄艮8宫(生门)，阴遁寄坤2宫(死门)
             if (zhiFuPalaceNum === 5) zhiShiDoor = (dun === 'yang') ? '生门' : '死门';
 
             // 时干在地盘的落宫（甲时取旬首遁干）
@@ -3284,7 +3284,7 @@ function getDayVoid(dayGanzhi) {
                 if (g) {
                     if (g.god) html += `<div class="dunjia-god">${g.god.slice(-1)}</div>`;
                     if (g.star) { const s = g.star.replace(/[（()）]/g, ''); const chars = []; for (let i = 0; i < s.length; i += 2) { if (i + 1 < s.length && /[\u4e00-\u9fff]/.test(s[i]) && /[\u4e00-\u9fff]/.test(s[i+1])) chars.push(s[i+1]); else if (i < s.length) chars.push(s[i]); } html += `<div class="dunjia-star">${chars.join('')}</div>`; }
-                    if (g.door) html += `<div class="dunjia-door">${g.door.slice(-1)}</div>`;
+                    if (g.door) html += `<div class="dunjia-door">${g.door.slice(0, 1)}</div>`;
                     if (g.stem_t) {
                         html += `<div class="dunjia-stem-t">${g.stem_t}</div>`;
                     }
