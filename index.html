@@ -2,133 +2,16 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
     <title>奇门遁甲排盘系统</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <style>
-        /* ========================================
-         * 全局基础样式
-         * 采用仿古纸张色调，配合宋体字体呈现传统文化风格
-         * ======================================== */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: "Microsoft YaHei", "SimHei", sans-serif; background-color: #f5f1e6; color: #333; line-height: 1.6; padding: 10px; min-height: 100vh; }
-        /* 主容器：居中、白色背景、阴影 */
-        .container { max-width: 800px; margin: 0 auto; background-color: #fff; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px 20px 10px 20px; min-height: calc(100vh - 20px); }
-        /* 页头：标题居中，底部装饰线 */
-        header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #e0d6c3; padding-bottom: 15px; }
-        h1 { color: #8c2318; font-size: 24px; margin-bottom: 5px; }
-        .subtitle { color: #666; font-size: 14px; }
-        /* 控制面板：日期选择与排盘方式按钮 */
-        .controls { background-color: #f9f5eb; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #e0d6c3; }
-        .control-group { margin-bottom: 15px; }
-
-        /* ========================================
-         * 日期选择器组件样式 (QimenDatePicker)
-         * 包含输入框、日历图标、弹窗及动画
-         * ======================================== */
-        .qdp-input-wrap { display: inline-flex; align-items: center; position: relative; }
-        /* 日期输入框：仿古底色，居中文本，聚焦时红色边框 */
-        .qdp-custom-input {
-            padding: 5px 28px 5px 10px;
-            border: 1px solid #c9b896;
-            border-radius: 6px;
-            background: #faf6ed;
-            color: #3d2b1f;
-            font-size: 14px;
-            font-family: inherit;
-            outline: none;
-            cursor: pointer;
-            text-align: center;
-        }
-        .qdp-custom-input:focus { border-color: #8c2318; box-shadow: 0 0 0 2px rgba(140,35,24,0.1); }
-        /* 日历图标：绝对定位于输入框右侧 */
-        .qdp-calendar-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            opacity: 0.55;
-            transition: opacity 0.2s;
-        }
-        .qdp-calendar-icon:hover { opacity: 0.85; }
-        .qdp-calendar-icon svg { display: block; }
-
-        /* 日期选择器弹窗：fixed 定位，带淡入动画 */
-        .qdp-popup-overlay {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            animation: qdp-fadeIn 0.2s ease;
-        }
-        .qdp-popup-overlay.show { display: block; }
-        @keyframes qdp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* 弹窗内容盒：上滑动画 */
-        .qdp-popup-box {
-            background: transparent;
-            border-radius: 12px;
-            animation: qdp-slideUp 0.25s ease;
-        }
-        @keyframes qdp-slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        /* ========================================
-         * 通用表单控件样式
-         * ======================================== */
-        label { display: inline-block; width: 120px; font-weight: bold; color: #5a4a3a; }
-        input, select, button { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        /* 主按钮：暗红色主题，hover 变亮 */
-        button { background-color: #8c2318; color: white; border: none; cursor: pointer; transition: background-color 0.3s; margin-right: 10px; }
-        button:hover { background-color: #a52a1f; }
-        .file-controls { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; }
-        /* ========================================
-         * 转盘/飞盘排盘结果样式
-         * ======================================== */
-        .qimen-container { margin-top: 30px; font-family: "SimSun", "宋体", serif; }
-        /* 信息卡片：显示农历、干支、节气等基本信息 */
-        .qimen-info { background-color: #f5f1e6; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #d4c9b1; font-size: 15px; line-height: 2; }
-        /* 排盘面板：仿古纸张渐变背景，内阴影营造质感 */
-        .qimen-pan { margin: 20px auto; max-width: 100%; background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355; font-size: 16px; line-height: 1.8; white-space: pre; font-family: "SimSun", "宋体", monospace; }
-        /* 转盘/飞盘九宫格：3x3 CSS Grid 布局 */
-        .qimen-grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 0; border: 1px solid #8b7355; border-radius: 6px; overflow: hidden; width: fit-content; margin: 0 auto; font-family: "SimSun", "宋体", monospace; font-size: 16px; line-height: 1.8; }
-        /* 九宫格单元格：flex 居中布局，上下 padding 8px，左右 padding 4px */
-        .qimen-grid .qimen-cell { background: #faf6ed; text-align: center; vertical-align: middle; width: 120px; height: 120px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; border-right: 1px solid #8b7355; border-bottom: 1px solid #8b7355; }
-        /* 每行第3列去掉右边框（与外框重合） */
-        .qimen-grid .qimen-cell:nth-child(3n) { border-right: none; }
-        /* 最后3行去掉下边框（与外框重合） */
-        .qimen-grid .qimen-cell:nth-last-child(-n+3) { border-bottom: none; }
-        .qimen-grid .qimen-cell span { display: inline; }
-
-        /* 状态提示样式 */
-        .status { margin-top: 10px; font-style: italic; color: #7f8c8d; text-align: center; }
-        .error { color: #c0392b; font-weight: bold; }
-        .loading { color: #27ae60; font-style: italic; }
-
-        /* ========================================
-         * 拆补法/置闰法九宫格样式 (遁甲排盘)
-         * 与转盘/飞盘不同，采用 absolute 定位布局
-         * 每个宫位内：神(左上)、天盘干(上中)、星(下中)、门(右下)、地盘干(左下)
-         * ======================================== */
-        .dunjia-container { margin-top: 30px; font-family: "SimSun", "宋体", monospace; }
-        .dunjia-grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 0; border: 1px solid #333; border-radius: 6px; overflow: hidden; margin-top: 15px; width: 362px; margin-left: auto; margin-right: auto; font-family: "SimSun", "宋体", monospace; font-size: 16px; line-height: 1.8; }
-        /* 遁甲单元格：relative 容器，内部元素 absolute 定位 */
-        .dunjia-cell { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; height: 120px; box-sizing: border-box; background: #faf6ed; border-right: 1px solid #333; border-bottom: 1px solid #333; }
-        .dunjia-cell:nth-child(3n) { border-right: none; }
-        .dunjia-cell:nth-last-child(-n+3) { border-bottom: none; }
-        .dunjia-cell.center { }
-        /* 八神：左上角，top/left 控制与边框的间距 */
-        .dunjia-god { position: absolute; top: 14px; left: 8px; font-size: 1rem; }
-        /* 九星：底部居中，与天盘干垂直对齐 */
-        .dunjia-star { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
-        /* 八门：右下角 */
-        .dunjia-door { position: absolute; bottom: 14px; right: 8px; font-size: 1rem; }
-        /* 天盘干：顶部居中，与星垂直对齐 */
-        .dunjia-stem-t { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 1rem; }
-        /* 地盘干：左下角，与神垂直左对齐 */
-        .dunjia-stem-d { position: absolute; bottom: 14px; left: 8px; font-size: 1rem; }
-        /* 宫位序号：右下角极小字号，辅助标识 */
-        .dunjia-num { position: absolute; bottom: 2px; right: 4px; font-size: 0.6rem; color: #bbb; }
+        /* 样式已迁移至 css/base.css 和 css/responsive.css */
     </style>
 </head>
 <body>
@@ -192,6 +75,7 @@
 
     <script src="js/lunar.js"></script>
     <script src="js/qimen-datepicker.js"></script>
+    <script src="js/mobile-touch.js"></script>
     <script>
         /* ========================================
          * 全局变量与常量定义
@@ -3241,9 +3125,9 @@ function getDayVoid(dayGanzhi) {
             }
 
             let html = `<h2>奇门遁甲 (${data.method || '遁甲排盘'})</h2>`;
-            html += `<div style="background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355;">`;
+            html += `<div style="background: linear-gradient(135deg, #faf6ed 0%, #f0e8d5 50%, #e8dcc5 100%); padding: 30px 30px 45px 30px; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1), inset 0 0 30px rgba(139,109,63,0.08); border: 1px solid #8b7355; margin-top:20px;">`;
             // ---- 信息卡片1: 农历日期与干支 ----
-            html += `<div class="qimen-info">`;
+            html += `<div class="qimen-info" style="background:transparent; border:none; padding:0;">`;
             html += `<div style="text-align:left; font-size:1.2rem; margin-bottom:6px;">${data.lunar}</div>`;
             html += `<div style="text-align:left; font-size:0.95rem; margin-bottom:6px; letter-spacing:1px;">${data.ganzhi}</div>`;
             html += `<div style="text-align:left; font-size:0.85rem;">`;
@@ -3253,7 +3137,7 @@ function getDayVoid(dayGanzhi) {
 
             // 置闰信息（仅置闰法显示：符头、超神/接气、积日、是否置润）
             if (data.zhirun_info) {
-                html += `<div style="background:rgba(140,35,24,0.05); padding:8px; border-radius:4px; margin-top:8px; border:1px dashed #d4c9b1;">`;
+                html += `<div style="background:rgba(140,35,24,0.05); padding:8px; margin-top:8px; border-radius:4px;">`;
                 html += `<div style="display:flex; justify-content:space-between; font-size:0.85rem;">`;
                 html += `<span>符头: ${data.zhirun_info.futou}</span>`;
                 html += `<span>${data.zhirun_info.chaoshen ? '超神' : '接气'}</span>`;
@@ -3391,9 +3275,11 @@ function getDayVoid(dayGanzhi) {
                     closeDatePicker();
                 }
             });
+            // 暴露给移动端触摸模块
+            window._qimenDatePicker = datePicker;
 
             // 定位弹窗到输入框下方
-            function positionPopup() {
+            window.positionPopup = function positionPopup() {
                 const rect = customTimeInput.getBoundingClientRect();
                 datePickerPopup.style.left = rect.left + 'px';
                 datePickerPopup.style.top = (rect.bottom + 4) + 'px';
